@@ -47,3 +47,5 @@ function eliminarHospital(idHospital) {
 }
 
 actualizarHospitales();
+
+function 

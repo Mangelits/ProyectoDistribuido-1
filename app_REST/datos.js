@@ -276,3 +276,11 @@ var resenyas = [
 ]
 module.exports.med=medicos
 module.exports.pac=pacientes
+module.exports.sanitarios = sanitarios
+module.exports.gestores = gestores
+module.exports.ubicaciones = ubicaciones
+module.exports.categorias = categorias
+module.exports.modelos = modelos
+module.exports.recursos = recursos
+module.exports.resenyas = resenyas
+module.exports.reservas = reservas

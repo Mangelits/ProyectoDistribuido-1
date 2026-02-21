@@ -25,8 +25,8 @@
         
         <h2 class="h2">Acceso</h2>
 
-       <div>Usuario: <input id="user" /></div> 
-       <div>Contraseña: <input id="password"/></div>
+       <div>Usuario: <input type="text" id="user" /></div> 
+       <div>Contraseña: <input type="text" id="password"/></div>
 
        <button onclick="entrar()">Entrar</button> 
        <button onclick="registrarse()">Registrarse</button>
@@ -66,6 +66,8 @@
     }
     */
 
+
+
 function cambiarSeccion(seccion){ //menu-principal
     document.getElementById(seccionActual).classList.toggle("activa"); //incialmente seccion actual = login (se la quita)
     document.getElementById(seccion).classList.toggle("activa"); //se la pone a menú principal
@@ -74,11 +76,6 @@ function cambiarSeccion(seccion){ //menu-principal
 
 
 
-function entrar(){
-    var usuario = document.getElementById("usuario").value;
-    //resto de variables y comprobación. Si todo es correcto...
-    cambiarSeccion("menu-principal");
-}
 
 
     function datosUsuario(){
@@ -94,7 +91,7 @@ function entrar(){
 
 </script>
 
-
+<script src="rest.js"></script> <script src="main.js"></script>
 </body>
 
 </html>

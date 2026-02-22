@@ -1,97 +1,229 @@
 <!doctype html>
-<html>
+<html lang="es">
 
 <head>
     <meta charset="utf8">
     <title>Gestión Recursos Hospitalarios</title>
     <style>
-        .seccion{display: none;}
-        .activa{display: block;} 
-    </style>
-    
-</head>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
 
+        /* --- CLASES OBLIGATORIAS PARA CAMBIAR DE VISTA --- */
+        .seccion { display: none; }
+        .activa { display: block; } 
+
+        /* Estilos básicos para las tablas que pide el PDF */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+
+        .header-app {
+            background-color: #a0a0a0;
+            padding: 10px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            border: 1px solid #000;
+            margin-bottom: 20px;
+        }
+
+        /* Colores para la tabla de reservas según el PDF */
+        .reserva-finalizada { background-color: #ffffff; } /* Blanco */
+        .reserva-en-uso-ok { background-color: #ccccff; }  /* Azul */
+        .reserva-en-uso-mal { background-color: #ffcccc; } /* Rojo */
+        .reserva-pendiente { background-color: #ccffcc; }  /* Verde */
+    </style>
+</head>
 
 <body>
 
+    <div class="header-app">Aplicación Gestor</div>
 
-    <h1 class="h1">Aplicación del Gestor</h1>
-
-
-    <!--
-    *       ----- LOGIN -----
-    -->
     <div id="login" class="seccion activa">
+        <h2>Acceso</h2>
+
+        <div><label>Usuario: </label><input type="text" id="login_user" /></div> 
+        <div style="margin-top: 5px;"><label>Contraseña: </label><input type="password" id="login_password"/></div>
+
+        <div style="margin-top: 15px;">
+            <button onclick="entrar()">Entrar</button> 
+            <button onclick="cambiarSeccion('datos-gestor')">Registrarse</button>
+        </div>
+    </div>
+
+    <div id="datos-gestor" class="seccion">
+        <h2>DATOS GESTOR</h2>
         
-        <h2 class="h2">Acceso</h2>
-
-       <div>Usuario: <input type="text" id="user" /></div> 
-       <div>Contraseña: <input type="text" id="password"/></div>
-
-       <button onclick="entrar()">Entrar</button> 
-       <button onclick="registrarse()">Registrarse</button>
+        <div><label>Nombre: </label><input type="text" id="gestor_nombre" /></div> 
+        <div style="margin-top: 5px;"><label>Apellidos: </label><input type="text" id="gestor_apellidos"/></div>
+        <div style="margin-top: 5px;"><label>Login: </label><input type="text" id="gestor_login"/></div>
+        <div style="margin-top: 5px;"><label>Contraseña: </label><input type="password" id="gestor_password"/></div>
+        
+        <div style="margin-top: 15px;">
+            <button onclick="guardarDatosGestor()">Guardar</button>
+            <button onclick="cancelarDatosGestor()">Cancelar</button>
+        </div>
     </div>
 
-    <!-- 
-    *       ----- MENU PRINCIPAL -----
-    -->
-
-    
     <div id="menu-principal" class="seccion">
-        <h2 class="h2">Inicio</h2>
-        <p> Bienvenido</p>
-        <button onclick="datosUsuario()"> Datos de usuario</button>
-        <button onclick="salir()"> Salir </button>
+        <h2>INICIO</h2>
+        
+        <p>
+            <span id="mensaje_bienvenida">Bienvenido </span>
+            <button onclick="editarDatosGestor()">Editar datos</button>
+        </p>
+        
+        <h3>Búsqueda de recursos</h3>
+        <div>
+            <label>Categoría: </label>
+            <select id="filtro_categoria">
+                <option value="Todos">Todos</option>
+            </select>
+        </div>
+        <div style="margin-top: 5px;">
+            <label>Modelo: </label>
+            <select id="filtro_modelo">
+                <option value="Todos">Todos</option>
+            </select>
+        </div>
+        <div style="margin-top: 5px;">
+            <label>Ubicación: </label>
+            <select id="filtro_ubicacion">
+                <option value="Todos">Todos</option>
+            </select>
+        </div>
+        <div style="margin-top: 5px;">
+            <label>Estado: </label>
+            <select id="filtro_estado">
+                <option value="Todos">Todos</option>
+                <option value="0">Operativo</option>
+                <option value="1">De baja o defectuoso</option>
+                <option value="2">En mantenimiento</option>
+            </select>
+        </div>
+        <div style="margin-top: 10px;">
+            <button onclick="buscarRecursos()">Buscar</button>
+        </div>
+
+        <h3>Recursos</h3>
+        <table id="tabla_recursos">
+            <thead>
+                <tr>
+                    <th>N. Serie</th>
+                    <th>Categoría</th>
+                    <th>Modelo</th>
+                    <th>Ubicación</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbody_recursos">
+                </tbody>
+        </table>
+        
+        <button onclick="nuevoRecurso()">Añadir Recurso</button>
+        
+        <div style="margin-top: 20px; text-align: right;">
+            <button onclick="salir()">Salir</button>
+        </div>
     </div>
 
-    <!-- 
-    *      ----- DATOS USUARIO -----
-    -->
+    <div id="vista-recurso" class="seccion">
+        <h2>RECURSO</h2>
+        
+        <input type="hidden" id="recurso_id_actual" value="">
 
+        <h3>Datos recurso</h3>
+        <div>
+            <label>Categoría: </label>
+            <select id="recurso_categoria"></select>
+        </div>
+        <div style="margin-top: 5px;">
+            <label>Modelo: </label>
+            <select id="recurso_modelo"></select>
+        </div>
+        <div style="margin-top: 5px;">
+            <label>Núm. Serie: </label>
+            <input type="text" id="recurso_num_serie" />
+        </div>
+        <div style="margin-top: 5px;">
+            <label>Ubicación: </label>
+            <select id="recurso_ubicacion"></select>
+        </div>
+        <div style="margin-top: 5px;">
+            <label>Estado: </label>
+            <select id="recurso_estado">
+                <option value="0">Operativo</option>
+                <option value="1">De baja o defectuoso</option>
+                <option value="2">En mantenimiento</option>
+            </select>
+        </div>
+        <div style="margin-top: 10px;">
+            <button onclick="guardarRecurso()">Guardar</button>
+        </div>
 
-    <div id="datos-usuarios" class="seccion">
-        <h2>Datos del usuario</h2>
-        <button onclick="cambiarSeccion('menu-principal')"> Datos de usuario</button>
-        <button onclick="salir()"> Salir </button>
+        <div id="seccion_reservas_resenyas" style="display: none;">
+            <h3>Reservas</h3>
+            <table id="tabla_reservas">
+                <thead>
+                    <tr>
+                        <th>Sanitario</th>
+                        <th>H. estim.</th>
+                        <th>F. Petición</th>
+                        <th>F. Inicio</th>
+                        <th>F. Fin</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody_reservas">
+                    </tbody>
+            </table>
+
+            <h3>Reseñas</h3>
+            <table id="tabla_resenyas">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Sanitario</th>
+                        <th>Valoración</th>
+                        <th>Comentario</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody_resenyas">
+                    </tbody>
+            </table>
+        </div>
+
+        <div style="margin-top: 20px; text-align: right;">
+            <button onclick="cambiarSeccion('menu-principal')">Volver al listado</button>
+        </div>
     </div>
 
 
-<script>
-    var seccionActual = "login";
-    /*
-    function cambiarSeccion(seccion){
-    document.getElementById(seccionActual).classList.remove("activa");
-    document.getElementById(seccion).classList.add("activa");
-    seccionActual=seccion;
-    }
-    */
+    <script>
+        var seccionActual = "login";
+        
+        function cambiarSeccion(seccion){
+            document.getElementById(seccionActual).classList.remove("activa");
+            document.getElementById(seccion).classList.add("activa");
+            seccionActual = seccion;
+        }
+    </script>
 
+    <script src="rest.js"></script> 
+    <script src="main.js"></script>
 
-
-function cambiarSeccion(seccion){ //menu-principal
-    document.getElementById(seccionActual).classList.toggle("activa"); //incialmente seccion actual = login (se la quita)
-    document.getElementById(seccion).classList.toggle("activa"); //se la pone a menú principal
-    seccionActual=seccion; //actualizar la nueva sección actual
-}
-
-
-
-
-
-    function datosUsuario(){
-        var usuario = document.getElementById("usuario").value;
-        //...jhbhb
-    }
-
-    function salir(){
-        cambiarSeccion("login");
-   
-    }
-
-
-</script>
-
-<script src="rest.js"></script> <script src="main.js"></script>
 </body>
-
 </html>

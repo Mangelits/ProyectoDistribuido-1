@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf8">
+	<title>Ejemplo RPC</title>
+	<style>
+		body,
+		input,
+		button {
+			font-family: Verdana, Geneva, Tahoma, sans-serif;
+			font-size: 12px;
+		}
+	</style>
+	<script src="rest.js"></script> 
+	<script src="rpc.js"></script> <!-- Hay que respetar el orden de la importación de estos scripts-->
+	<script src="main.js"></script>
+</head>
+
+<body onload="cargar()">
+	<div>
+		<label>Nombre: <input id="nombre" type="text" /></label>
+		<label>Apellidos: <input id="apellidos" type="text" /></label>
+		<label>Edad:<input id="edad" type="number" /></label>
+		<button onclick="anyadir()">Añadir paciente</button>
+	</div>
+	<hr>
+	<p>Lista de pacientes:</p>
+	<ul id="lista"></ul>
+	<button onclick="cargar()">Recargar lista</button>
+</body>
+
+</html>

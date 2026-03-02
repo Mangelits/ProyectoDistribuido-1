@@ -53,7 +53,7 @@ var recursos = datosServidor.recursos;
 var reservas = datosServidor.reservas;
 var resenyas = datosServidor.resenyas;
 
-app.use("/appCliente", express.static("cliente")); 
+app.use("/appCliente", express.static("cliente_rest")); 
 app.use(express.json()); 
 
 

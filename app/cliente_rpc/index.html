@@ -1,3 +1,4 @@
+<!--
 <!doctype html>
 <html>
 
@@ -13,7 +14,7 @@
 		}
 	</style>
 	<script src="rest.js"></script> 
-	<script src="rpc.js"></script> <!-- Hay que respetar el orden de la importación de estos scripts-->
+	<script src="rpc.js"></script> >>> Hay que respetar el orden de la importación de estos scripts
 	<script src="main.js"></script>
 </head>
 
@@ -30,4 +31,112 @@
 	<button onclick="cargar()">Recargar lista</button>
 </body>
 
+</html>
+-->
+
+<!--
+!===============================================
+!				HTML SANITARIOS
+!===============================================
+-->
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf8">
+    <title>Applicación sanitarios</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        /* --- CLASES OBLIGATORIAS PARA CAMBIAR DE VISTA --- */
+        .seccion { display: none; }
+        .activa { display: block; } 
+
+        /* Estilos básicos para las tablas que pide el PDF */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+
+        .header-app {
+            background-color: #a0a0a0;
+            padding: 10px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            border: 1px solid #000;
+            margin-bottom: 20px;
+        }
+
+    </style>
+
+	<script src="rest.js"></script> 
+	<script src="rpc.js"></script> <!--! Hay que respetar el orden de la importación de estos scripts -->
+	<script src="main.js"></script>
+</head>
+
+<body>
+
+    <div class="header-app">Aplicación Sanitario</div>
+
+    <div id="login" class="seccion activa">
+        <h2>Acceso</h2>
+
+        <div><label>Usuario: </label><input type="text" id="login_user" /></div> 
+        <div style="margin-top: 5px;"><label>Contraseña: </label><input type="password" id="login_password"/></div>
+
+        <div style="margin-top: 15px;">
+            <button onclick="entrar()">Entrar</button> 
+            <button onclick="cambiarSeccion('datos-gestor')">Registrarse</button>
+        </div>
+    </div>
+
+    <div id="datos-sanitario" class="seccion">
+        <h2>DATOS SANITARIO</h2>
+        
+        <div>							<label>Nombre: </label>		<input type="text" id="sanitario_nombre" /></div> 
+        <div style="margin-top: 5px;">	<label>Apellidos: </label>	<input type="text" id="sanitario_apellidos"/></div>
+        <div style="margin-top: 5px;">	<label>Login: </label>		<input type="text" id="sanitario_login"/></div>
+        <div style="margin-top: 5px;">	<label>Contraseña: </label>	<input type="password" id="sanitario_password"/></div>
+        
+        <div style="margin-top: 15px;">
+            <button onclick="guardarDatosSanitario()">Guardar</button>
+            <button onclick="cancelarDatosSanitario()">Cancelar</button>
+        </div>
+    </div>
+
+    <div id="menu-principal" class="seccion">
+        <h2>INICIO</h2>
+        
+        <p>
+            <span id="mensaje_bienvenida">Bienvenido </span>
+            <button onclick="editarDatosSanitario()">Editar datos</button>
+        </p>
+        
+        <!-- PARTE ESPECIFICA DEL SANITARIO-->
+
+
+    <script>
+        var seccionActual = "login";
+        
+        function cambiarSeccion(seccion){
+            document.getElementById(seccionActual).classList.remove("activa");
+            document.getElementById(seccion).classList.add("activa");
+            seccionActual = seccion;
+        }
+    </script>
+</body>
 </html>

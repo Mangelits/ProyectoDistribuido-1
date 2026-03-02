@@ -23,6 +23,7 @@ var sanitarios = [
  * ! id y user es UNICO
  */
 var gestores = [
+    {"id": "admin", "nom": "Mangel", "ape": "Amoros", "user": "admin", "pswd": "1234"},
     {"id": "1", "nom": "Ricardo", "ape": "Mora",    "user": "RM1", "pswd": "gestor123"},
     {"id": "2", "nom": "Laura",   "ape": "Vidal",   "user": "LV2", "pswd": "admin456"},
     {"id": "3", "nom": "Sergio",  "ape": "Tello",   "user": "ST3", "pswd": "pass789"},
@@ -103,7 +104,7 @@ var recursos = [
     {"id": "R005", "modelo": "OXI1", "ubi": "S07", "num_serie": "OXI-7712X",    "estado": "1"}, 
     {"id": "R006", "modelo": "EPI1", "ubi": "S08", "num_serie": "LOT-2024-01",  "estado": "0"}, 
     {"id": "R007", "modelo": "MOB1", "ubi": "S04", "num_serie": "CAM-A1-001",   "estado": "0"}, 
-    {"id": "R008", "modelo": "TER3", "ubi": "S03", "num_serie": "DT-5566G",     "estado": "0"}, 
+    {"id": "R008", "modelo": "TER3", "ubi": "S03", "num_serie": "DT-5566G",     "estado": "2"}, 
     {"id": "R009", "modelo": "SON1", "ubi": "S01", "num_serie": "SND-9900",     "estado": "0"}, 
     {"id": "R010", "modelo": "EST2", "ubi": "S09", "num_serie": "EST-4433",     "estado": "2"},
     {"id": "R011", "modelo": "TER1", "ubi": "S01", "num_serie": "131240C",      "estado": "0"},
@@ -114,7 +115,7 @@ var recursos = [
     {"id": "R016", "modelo": "SON1", "ubi": "S01", "num_serie": "SND-9901",     "estado": "0"},
     {"id": "R017", "modelo": "DES1", "ubi": "S08", "num_serie": "GEL-100",       "estado": "0"},
     {"id": "R018", "modelo": "EPI2", "ubi": "S01", "num_serie": "BAT-500",      "estado": "0"},
-    {"id": "R019", "modelo": "TER2", "ubi": "S06", "num_serie": "AYS124-X",     "estado": "0"},
+    {"id": "R019", "modelo": "TER2", "ubi": "S06", "num_serie": "AYS124-X",     "estado": "1"},
     {"id": "R020", "modelo": "JER1", "ubi": "S08", "num_serie": "JER-001",      "estado": "0"}
 ];
 

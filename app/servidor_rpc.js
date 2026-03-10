@@ -1,46 +1,39 @@
 //Es necesario instalar en la carpeta del servidor los modulos cors y express
+var rpc = require("./rpc.js");
+var datos = require("./datos.js");
 
-var rpc = require("./rpc.js"); //incorporamos la libreria
+var sanitarios = datos.sanitarios;
 
-var datos=require("./datos.js")
-var pacientes = datos.pac
 
-var siguienteId = 2; 
+var express = require("express");
+var appExpress = express();
+appExpress.use("/cliente_rpc", express.static("cliente_rpc"));
 
-//Función para obtener los pacientes
-function obtenerPacientes(callback) {
-    return callback(pacientes); // Equivalente en RES, al REST.STATUS.JSON
-}
+function loginSanitario(user, password, callback) {
+    var sanitarioFound = sanitarios.find(function(s) {
+        return s.user === user && s.pswd === password; // Comparo s (de sanitario funcion).user , con el parametro de loginSanitario user y lo mismo con la contraseña
+    });
 
-//Función para crear un nuevo paciente. Retorna su id o 0 si ha fallado
-function anyadirPaciente(nom, ape, ed, callback) { 
-    if (!nom || !ape || !ed) return callback(0); 
-
-    var id = siguienteId; 
-    siguienteId++; 
-    console.log("Añadir paciente", nom, ape, ed);
-    pacientes.push({ id: id, nombre: nom, apellidos: ape, edad: ed }); 
-    return callback(id);
-}
-
-//Función para eliminar un paciente. Retorna true o false 
-function eliminarPaciente(id, callback) {
-    for (var i = 0; i<pacientes.length ; i ++) {
-        if (pacientes[i].id == id) {
-            pacientes.splice(i, 1);
-            return callback(true); // paciente borrado
-        }
+    if (sanitarioFound) { //Significa = Si sanitadioFound es true (existe) (return anterior)
+        callback(sanitarioFound.id) // el callback es su id (Que luego queremos guardar)
+    } else {
+        callback(null) //El callback será null, para que sirva en la funcion del main
     }
-    return callback(false); // paciente no borrado (no encontrado)
-}
+} 
 
 var servidor = rpc.server(); // crear el servidor RPC
-var app = servidor.createApp("gestion_pacientes"); // crear aplicación de RPC
+var app = servidor.createApp("gestion_sanitarios"); // crear aplicación de RPC
 
-//Registramos los procedimientos
-app.registerAsync(obtenerPacientes); // es el segundo paso, registramos la funcion, en RPC
-app.registerAsync(anyadirPaciente);
-app.registerAsync(eliminarPaciente);
+//Registramos los procedimientos | Es el segundo paso
+app.registerAsync(loginSanitario);
+appExpress.use(express.json());
+
+// CORRECCIÓN 2: Usar la variable correcta 'servidor' que definiste arriba
+appExpress.use(servidor.handler); 
+
+appExpress.listen(3000, function() {
+    console.log("Servidor RPC y Web iniciado en http://localhost:3000/cliente_rpc/index.html");
+});
 
 
 
@@ -50,4 +43,3 @@ app.registerAsync(eliminarPaciente);
  * Hago funciones en el servidor, las registro en el servidor. Y luego en el main las referenciamos para que se puedan utilizar
  * 
  */
-

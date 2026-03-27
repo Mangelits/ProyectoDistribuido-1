@@ -1,0 +1,1579 @@
+{
+  "tipo_procesion": "personalizada",
+  "lleva_cruz": true,
+  "costaleros_7": false,
+  "Trono": {
+    "Turno A": {
+      "Delante": {
+        "Izquierda": [
+          {
+            "id": 56,
+            "nombre": "Iván Fenoll Rodriguez",
+            "telefono": "",
+            "altura": 154,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 42,
+            "nombre": "Cristo Fernando Abadía López",
+            "telefono": "",
+            "altura": 153,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": false
+          },
+          {
+            "id": 93,
+            "nombre": "Miguel Ángel Amorós Rodríguez",
+            "telefono": "603 442 400",
+            "altura": 151,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 2,
+            "nombre": "Abraham Sarmiento Marín",
+            "telefono": "",
+            "altura": 150,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 103,
+            "nombre": "Noelia Grao López",
+            "telefono": "",
+            "altura": 148,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 6,
+            "nombre": "Alejandro Gea Martí",
+            "telefono": "",
+            "altura": 147,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ],
+        "Centro": [
+          {
+            "id": 17,
+            "nombre": "Andrés García Martí",
+            "telefono": "",
+            "altura": 162,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 107,
+            "nombre": "Oscar Martínez Martínez",
+            "telefono": "",
+            "altura": 159,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 44,
+            "nombre": "David Lorca Rodríguez",
+            "telefono": "",
+            "altura": 155,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 49,
+            "nombre": "Fernando Mas Pérez",
+            "telefono": "",
+            "altura": 153,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 4,
+            "nombre": "Aitor Guirao Rodriguez",
+            "telefono": "",
+            "altura": 152,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": false
+          },
+          {
+            "id": 22,
+            "nombre": "Antonio Jesús Cabrera Ferrández",
+            "telefono": "",
+            "altura": 150,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ],
+        "Derecha": [
+          {
+            "id": 58,
+            "nombre": "Jose Antonio Lidón Pérez",
+            "telefono": "",
+            "altura": 157,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": false
+          },
+          {
+            "id": 106,
+            "nombre": "Nuria Ortega Lidón",
+            "telefono": "",
+            "altura": 154,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 108,
+            "nombre": "Oscar Martínez Mora",
+            "telefono": "",
+            "altura": 153,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 94,
+            "nombre": "Miguel Ángel Espinosa Mula",
+            "telefono": "",
+            "altura": 152,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 7,
+            "nombre": "Alicia Bas Munuera",
+            "telefono": "",
+            "altura": 150,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 26,
+            "nombre": "Beatriz Jara Rodríguez",
+            "telefono": "",
+            "altura": 147,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ]
+      },
+      "Detras": {
+        "Izquierda": [
+          {
+            "id": 76,
+            "nombre": "M Dolores Rodriguez Lorente",
+            "telefono": "",
+            "altura": 144,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 90,
+            "nombre": "Mariano Díaz Vélez",
+            "telefono": "",
+            "altura": 144,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": false
+          },
+          {
+            "id": 66,
+            "nombre": "Loli Martí Rocamora",
+            "telefono": "",
+            "altura": 144,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 100,
+            "nombre": "Natalia Belmonte Bas",
+            "telefono": "",
+            "altura": 145,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 41,
+            "nombre": "Cristina Sánchez Moya",
+            "telefono": "",
+            "altura": 146,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": false
+          },
+          {
+            "id": 50,
+            "nombre": "Francisco Noguera Saura",
+            "telefono": "",
+            "altura": 147,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ],
+        "Centro": [
+          {
+            "id": 99,
+            "nombre": "Monserrate Coll Mula",
+            "telefono": "",
+            "altura": 144,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 32,
+            "nombre": "Carla López Rodríguez",
+            "telefono": "",
+            "altura": 144,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": false
+          },
+          {
+            "id": 11,
+            "nombre": "Alvaro Sarmiento Caselles",
+            "telefono": "",
+            "altura": 145,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 97,
+            "nombre": "Moises Lorente Irles",
+            "telefono": "",
+            "altura": 146,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 95,
+            "nombre": "Milagros Peñalver Lorenzo",
+            "telefono": "",
+            "altura": 147,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": false
+          },
+          {
+            "id": 43,
+            "nombre": "Daniel Mira Juan",
+            "telefono": "",
+            "altura": 147,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ],
+        "Derecha": [
+          {
+            "id": 128,
+            "nombre": "Noel Lopez Garcia",
+            "telefono": "",
+            "altura": 143,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": false
+          },
+          {
+            "id": 86,
+            "nombre": "M Jose Hernandez Hernandez",
+            "telefono": "",
+            "altura": 143,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 80,
+            "nombre": "M Jesús Tovar Cuenca",
+            "telefono": "",
+            "altura": 145,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 62,
+            "nombre": "Laura Rodríguez Cerezo",
+            "telefono": "",
+            "altura": 142,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": false
+          },
+          {
+            "id": 52,
+            "nombre": "Gisela Mora Samper",
+            "telefono": "",
+            "altura": 146,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 51,
+            "nombre": "Gelen Huertas Mateo",
+            "telefono": "",
+            "altura": 146,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ]
+      }
+    },
+    "Turno B": {
+      "Delante": {
+        "Izquierda": [
+          {
+            "id": 68,
+            "nombre": "Lucía Cerezo López",
+            "telefono": "",
+            "altura": 143,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 35,
+            "nombre": "Carmen M Hernández Cámara",
+            "telefono": "",
+            "altura": 143,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 124,
+            "nombre": "Verónica Soto Sarabia",
+            "telefono": "",
+            "altura": 141,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 127,
+            "nombre": "Aroa Hernandez Galindo",
+            "telefono": "",
+            "altura": 137,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 13,
+            "nombre": "Ana M Rodríguez Lorente",
+            "telefono": "",
+            "altura": 140,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 118,
+            "nombre": "Sandra Cañete Murcia",
+            "telefono": "",
+            "altura": 139,
+            "pref_hombro": "Ambos",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ],
+        "Centro": [
+          {
+            "id": 101,
+            "nombre": "Natalia Vinuesa Martínez",
+            "telefono": "",
+            "altura": 143,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": false
+          },
+          {
+            "id": 63,
+            "nombre": "Laura Vera Zapalana",
+            "telefono": "",
+            "altura": 142,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 23,
+            "nombre": "Antonio Lidón Martínez",
+            "telefono": "",
+            "altura": 141,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 45,
+            "nombre": "Elisa Pardines Ferrández",
+            "telefono": "",
+            "altura": 140,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 109,
+            "nombre": "Pablo Martínez Pérez",
+            "telefono": "",
+            "altura": 139,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 132,
+            "nombre": "Irene Nortes Valero",
+            "telefono": "",
+            "altura": 139,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ],
+        "Derecha": [
+          {
+            "id": 126,
+            "nombre": "Zenaida Vivancos Vivancos",
+            "telefono": "",
+            "altura": 143,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": false
+          },
+          {
+            "id": 96,
+            "nombre": "Mireia Larrósa Gómez",
+            "telefono": "",
+            "altura": 142,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 16,
+            "nombre": "Andrea Fernández Zaragoza",
+            "telefono": "",
+            "altura": 140,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 98,
+            "nombre": "Mónica Corbalán Navarro",
+            "telefono": "",
+            "altura": 140,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 33,
+            "nombre": "Carlota Marcos Belmonte",
+            "telefono": "",
+            "altura": 138,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 53,
+            "nombre": "Iluminada M Cabrera Ferrández",
+            "telefono": "",
+            "altura": 138,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ]
+      },
+      "Detras": {
+        "Izquierda": [
+          {
+            "id": 46,
+            "nombre": "Erika Navarro Zaragoza",
+            "telefono": "",
+            "altura": 129,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 75,
+            "nombre": "M del Mar García Grau",
+            "telefono": "",
+            "altura": 133,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 48,
+            "nombre": "Esther Cano Bermúdez",
+            "telefono": "",
+            "altura": 134,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 115,
+            "nombre": "Raquel Rodríguez Escudero",
+            "telefono": "",
+            "altura": 135,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 28,
+            "nombre": "Blanca Rosa Medina Oltra",
+            "telefono": "",
+            "altura": 136,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 8,
+            "nombre": "Alicia Murcia Ros",
+            "telefono": "",
+            "altura": 137,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ],
+        "Centro": [
+          {
+            "id": 125,
+            "nombre": "Visi Díaz Hernández",
+            "telefono": "",
+            "altura": 132,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": false
+          },
+          {
+            "id": 1,
+            "nombre": "Abigail García Botella",
+            "telefono": "",
+            "altura": 133,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": false
+          },
+          {
+            "id": 113,
+            "nombre": "Pilar Ruíz Cerezo",
+            "telefono": "",
+            "altura": 134,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 111,
+            "nombre": "Paula Martinez Casanova",
+            "telefono": "",
+            "altura": 136,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": false
+          },
+          {
+            "id": 70,
+            "nombre": "Lydia Espinosa Fenoll",
+            "telefono": "",
+            "altura": 136,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 61,
+            "nombre": "Karima Calvo Espinosa",
+            "telefono": "",
+            "altura": 137,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ],
+        "Derecha": [
+          {
+            "id": 20,
+            "nombre": "Angela Ruiz Caselles",
+            "telefono": "",
+            "altura": 131,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 29,
+            "nombre": "Brenda Martínez Sampere",
+            "telefono": "",
+            "altura": 132,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 74,
+            "nombre": "M del Carmen Fernández Belmonte",
+            "telefono": "",
+            "altura": 134,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 77,
+            "nombre": "M Dolores Zárate Chumillas",
+            "telefono": "",
+            "altura": 135,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 110,
+            "nombre": "Paula Marco Ruíz",
+            "telefono": "",
+            "altura": 136,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 72,
+            "nombre": "M Ángeles López Cerezo",
+            "telefono": "",
+            "altura": 137,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ]
+      }
+    },
+    "Turno C": {
+      "Delante": {
+        "Izquierda": [
+          {
+            "id": 60,
+            "nombre": "Josefina Rabasco Giménez",
+            "telefono": "",
+            "altura": 140,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 9,
+            "nombre": "Alicia Ruíz Cerezo",
+            "telefono": "",
+            "altura": 139,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 91,
+            "nombre": "Mariola Plaza Aniorte",
+            "telefono": "",
+            "altura": 139,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 64,
+            "nombre": "Leticia Padilla Cuerdo",
+            "telefono": "",
+            "altura": 138,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 87,
+            "nombre": "María Lorente Zárate",
+            "telefono": "",
+            "altura": 137,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 28,
+            "nombre": "Blanca Rosa Medina Oltra",
+            "telefono": "",
+            "altura": 136,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ],
+        "Centro": [
+          {
+            "id": 13,
+            "nombre": "Ana M Rodríguez Lorente",
+            "telefono": "",
+            "altura": 140,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 109,
+            "nombre": "Pablo Martínez Pérez",
+            "telefono": "",
+            "altura": 139,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 31,
+            "nombre": "Carla Fernández Ballesta",
+            "telefono": "",
+            "altura": 138,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 8,
+            "nombre": "Alicia Murcia Ros",
+            "telefono": "",
+            "altura": 137,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 70,
+            "nombre": "Lydia Espinosa Fenoll",
+            "telefono": "",
+            "altura": 136,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 115,
+            "nombre": "Raquel Rodríguez Escudero",
+            "telefono": "",
+            "altura": 135,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ],
+        "Derecha": [
+          {
+            "id": 84,
+            "nombre": "M Rosa García Cabrera",
+            "telefono": "",
+            "altura": 140,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 117,
+            "nombre": "Rosario Fructuoso Huertas",
+            "telefono": "",
+            "altura": 139,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 121,
+            "nombre": "Sofia Bas Martí",
+            "telefono": "",
+            "altura": 138,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 18,
+            "nombre": "Ángela Cerezo López",
+            "telefono": "",
+            "altura": 138,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 14,
+            "nombre": "Anabel Arce Pedrique",
+            "telefono": "",
+            "altura": 136,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 77,
+            "nombre": "M Dolores Zárate Chumillas",
+            "telefono": "",
+            "altura": 135,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ]
+      },
+      "Detras": {
+        "Izquierda": [
+          {
+            "id": 122,
+            "nombre": "Sofía Vinuesa Martínez",
+            "telefono": "",
+            "altura": 129,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 130,
+            "nombre": "Elena Cayuelas Belmonte",
+            "telefono": "",
+            "altura": 130,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 104,
+            "nombre": "Noemí García Bernabé",
+            "telefono": "",
+            "altura": 130,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 34,
+            "nombre": "Carmen Bas Martí",
+            "telefono": "",
+            "altura": 131,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 125,
+            "nombre": "Visi Díaz Hernández",
+            "telefono": "",
+            "altura": 132,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": false
+          },
+          {
+            "id": 83,
+            "nombre": "M Pilar Cerezo Palop",
+            "telefono": "",
+            "altura": 134,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ],
+        "Centro": [
+          {
+            "id": 21,
+            "nombre": "Ángeles Zaragoza Lucas",
+            "telefono": "",
+            "altura": 126,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 82,
+            "nombre": "M José Sánchez Fernández",
+            "telefono": "",
+            "altura": 128,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 10,
+            "nombre": "Almudena Mula Abadía",
+            "telefono": "",
+            "altura": 130,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 24,
+            "nombre": "Ariadna Martínez Martí",
+            "telefono": "",
+            "altura": 131,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 69,
+            "nombre": "Lucía Sánchez Vázquez",
+            "telefono": "",
+            "altura": 132,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 75,
+            "nombre": "M del Mar García Grau",
+            "telefono": "",
+            "altura": 133,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ],
+        "Derecha": [
+          {
+            "id": 54,
+            "nombre": "Inmaculada Andúgar Costa",
+            "telefono": "",
+            "altura": 129,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 39,
+            "nombre": "Claudia Ruiz Caselles",
+            "telefono": "",
+            "altura": 130,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 105,
+            "nombre": "Nuria Laguía Martínez",
+            "telefono": "",
+            "altura": 131,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 85,
+            "nombre": "Manoli Martínez Lizón",
+            "telefono": "",
+            "altura": 132,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 1,
+            "nombre": "Abigail García Botella",
+            "telefono": "",
+            "altura": 133,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": false
+          },
+          {
+            "id": 65,
+            "nombre": "Lola Bas Martí",
+            "telefono": "",
+            "altura": 134,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ]
+      }
+    }
+  },
+  "Cruz": {
+    "Turno 1": {
+      "Delante": {
+        "Izquierda": [
+          {
+            "id": 6,
+            "nombre": "Alejandro Gea Martí",
+            "telefono": "",
+            "altura": 147,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": true
+          },
+          {
+            "id": 43,
+            "nombre": "Daniel Mira Juan",
+            "telefono": "",
+            "altura": 147,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": true
+          }
+        ],
+        "Derecha": [
+          {
+            "id": 26,
+            "nombre": "Beatriz Jara Rodríguez",
+            "telefono": "",
+            "altura": 147,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": true
+          },
+          {
+            "id": 95,
+            "nombre": "Milagros Peñalver Lorenzo",
+            "telefono": "",
+            "altura": 147,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": true
+          }
+        ]
+      },
+      "Detras": {
+        "Izquierda": [
+          {
+            "id": 52,
+            "nombre": "Gisela Mora Samper",
+            "telefono": "",
+            "altura": 146,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": true
+          },
+          {
+            "id": 41,
+            "nombre": "Cristina Sánchez Moya",
+            "telefono": "",
+            "altura": 146,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": false,
+            "bloqueado": true
+          }
+        ],
+        "Derecha": [
+          {
+            "id": 51,
+            "nombre": "Gelen Huertas Mateo",
+            "telefono": "",
+            "altura": 146,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": true
+          },
+          {
+            "id": 97,
+            "nombre": "Moises Lorente Irles",
+            "telefono": "",
+            "altura": 146,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": true
+          }
+        ]
+      }
+    },
+    "Turno 2": {
+      "Delante": {
+        "Izquierda": [
+          {
+            "id": 117,
+            "nombre": "Rosario Fructuoso Huertas",
+            "telefono": "",
+            "altura": 139,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 64,
+            "nombre": "Leticia Padilla Cuerdo",
+            "telefono": "",
+            "altura": 138,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ],
+        "Derecha": [
+          {
+            "id": 9,
+            "nombre": "Alicia Ruíz Cerezo",
+            "telefono": "",
+            "altura": 139,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 121,
+            "nombre": "Sofia Bas Martí",
+            "telefono": "",
+            "altura": 138,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ]
+      },
+      "Detras": {
+        "Izquierda": [
+          {
+            "id": 71,
+            "nombre": "M Adela Ros Marín",
+            "telefono": "",
+            "altura": 136,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 87,
+            "nombre": "María Lorente Zárate",
+            "telefono": "",
+            "altura": 137,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ],
+        "Derecha": [
+          {
+            "id": 14,
+            "nombre": "Anabel Arce Pedrique",
+            "telefono": "",
+            "altura": 136,
+            "pref_hombro": "Izquierdo",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 18,
+            "nombre": "Ángela Cerezo López",
+            "telefono": "",
+            "altura": 138,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ]
+      }
+    },
+    "Turno 3": {
+      "Delante": {
+        "Izquierda": [
+          {
+            "id": 23,
+            "nombre": "Antonio Lidón Martínez",
+            "telefono": "",
+            "altura": 141,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 79,
+            "nombre": "M Jesús Aledo Beltrán",
+            "telefono": "",
+            "altura": 141,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ],
+        "Derecha": [
+          {
+            "id": 96,
+            "nombre": "Mireia Larrósa Gómez",
+            "telefono": "",
+            "altura": 142,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 123,
+            "nombre": "Verónica Rabasco Ferrández",
+            "telefono": "",
+            "altura": 141,
+            "pref_hombro": "Derecho",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ]
+      },
+      "Detras": {
+        "Izquierda": [
+          {
+            "id": 127,
+            "nombre": "Aroa Hernandez Galindo",
+            "telefono": "",
+            "altura": 137,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 16,
+            "nombre": "Andrea Fernández Zaragoza",
+            "telefono": "",
+            "altura": 140,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ],
+        "Derecha": [
+          {
+            "id": 98,
+            "nombre": "Mónica Corbalán Navarro",
+            "telefono": "",
+            "altura": 140,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          },
+          {
+            "id": 45,
+            "nombre": "Elisa Pardines Ferrández",
+            "telefono": "",
+            "altura": 140,
+            "pref_hombro": "",
+            "puede_repetir": true,
+            "miercoles_santo": true,
+            "viernes_santo": true,
+            "bloqueado": false
+          }
+        ]
+      }
+    }
+  },
+  "Mapping": {
+    "Tramo 1": {
+      "Ruta": "De San Fco a Cruce c/Matias Rogel con Av constitucion ",
+      "Trono": "Turno B",
+      "Cruz": "Turno 1"
+    },
+    "Tramo 2": {
+      "Ruta": "De Cruce c/Matias Rogel con Av constitucion a Cruce c/Capuchinos con c/Capillas (tras pasar pájaro)",
+      "Trono": "Turno A",
+      "Cruz": "Turno 2"
+    },
+    "Tramo 3": {
+      "Ruta": "De Av constitucion a Cruce c/Capuchinos con c/Capillas (tras pasar pájaro) a  Monserrate",
+      "Trono": "Turno C",
+      "Cruz": "Turno 3"
+    }
+  },
+  "Indicaciones": {
+    "Tramo 1": "",
+    "Tramo 2": "",
+    "Tramo 3": ""
+  }
+}

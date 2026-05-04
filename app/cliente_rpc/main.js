@@ -40,7 +40,10 @@ var finalizarReservaRPC = appRPC.procedure("finalizarReserva");
 // VARIABLES GLOBALES DE SESIÓN
 // ======================================================================
 var idSanitarioLogueado = null;
+var nombreSanitarioLogueado = ''; // Para origen en avisos WS
+var wsSanitario = null;           // Conexión WebSocket (Parte 3)
 var idRecursoResenya = null;
+var datosRecursoResenya = {};     // {nombreCat, nombreMod, numSerie} para WS
 
 // Caché local para resolver nombres sin llamar al servidor cada vez
 var categoriasLocal = [];
@@ -67,6 +70,13 @@ function entrar() {
                 categoriasLocal = cats;
                 obtenerModsRPC(function(mods) {
                     modelosLocal = mods;
+                    // Obtener nombre del sanitario y abrir WS (Parte 3)
+                    obtenerSanRPC(idSanitarioLogueado, function(sanitario) {
+                        if (sanitario) {
+                            nombreSanitarioLogueado = sanitario.nom + ' ' + sanitario.ape;
+                        }
+                        abrirWsSanitario();
+                    });
                     cambiarSeccion('menu-principal');
                     actualizarInicio();
                 });
@@ -79,6 +89,13 @@ function entrar() {
 // Se llama al pulsar "Salir" — limpia la sesión y vuelve al login
 function salir() {
     idSanitarioLogueado = null;
+    // Cerrar WebSocket al salir (Parte 3)
+    if (wsSanitario) {
+        wsSanitario.close();
+        wsSanitario = null;
+    }
+    // Limpiar tabla de avisos
+    document.getElementById('tbody_avisos').innerHTML = '<tr><td colspan="3"><em>Sin avisos recibidos aún</em></td></tr>';
     document.getElementById("login_user").value = "";
     document.getElementById("login_password").value = "";
     cambiarSeccion('login');
@@ -178,8 +195,9 @@ function cargarTablaPendientes(pendientes) {
 
             tiempoPendienteRPC(reserva.recurso, function(horas) {
                 var horasTexto  = horas > 0 ? horas + "h" : "0";
+                // Pasar datos del recurso para la notificación WS (Parte 3)
                 var botonRetirar = horas === 0
-                    ? `<button onclick="retirarRecurso('${reserva.id}')">Retirar</button> `
+                    ? `<button onclick="retirarRecurso('${reserva.id}','${reserva.recurso}','${nombreCat}','${nombreMod}','${recurso.num_serie}')">Retirar</button> `
                     : "";
 
                 var fila = `<tr>
@@ -225,7 +243,7 @@ function cargarTablaRealizadas(realizadas) {
             // F.Fin: muestra la fecha si existe, o el botón Devolver si no
             var celdaFin = reserva.fecha_fin
                 ? formatearFecha(reserva.fecha_fin)
-                : `<button onclick="devolverRecurso('${reserva.id}')">Devolver</button>`;
+                : `<button onclick="devolverRecurso('${reserva.id}','${reserva.recurso}','${nombreCat}','${nombreMod}','${recurso.num_serie}')">Devolver</button>`;
 
             var fila = `<tr>
                 <td>${nombreCat}</td>
@@ -234,7 +252,7 @@ function cargarTablaRealizadas(realizadas) {
                 <td>${reserva.horas_estimadas}</td>
                 <td>${formatearFecha(reserva.fecha_inicio)}</td>
                 <td>${celdaFin}</td>
-                <td><button onclick="abrirResenya('${reserva.recurso}', '${recurso.num_serie}')">Reseña</button></td>
+                <td><button onclick="abrirResenya('${reserva.recurso}', '${recurso.num_serie}', '${nombreCat}', '${nombreMod}')">Reseña</button></td>
             </tr>`;
             tbody.innerHTML += fila;
         });
@@ -244,9 +262,21 @@ function cargarTablaRealizadas(realizadas) {
 // ======================================================================
 // ACCIONES SOBRE RESERVAS
 // ======================================================================
-function retirarRecurso(idReserva) {
+function retirarRecurso(idReserva, idRecurso, nombreCat, nombreMod, numSerie) {
     iniciarReservaRPC(idReserva, function(resultado) {
         if (resultado) {
+            // Notificar via WS a sanitarios con reserva activa en ese recurso (Parte 3)
+            enviarAvisoWS({
+                action: 'notificar',
+                tipo: 'reserva',
+                accion: 'INICIADO',
+                idRecurso: idRecurso,
+                idSanitario: idSanitarioLogueado,
+                origen: nombreSanitarioLogueado,
+                nombreCategoria: nombreCat || '',
+                nombreModelo: nombreMod || '',
+                numSerie: numSerie || ''
+            });
             actualizarInicio();
         } else {
             alert("Error al retirar el recurso");
@@ -254,9 +284,21 @@ function retirarRecurso(idReserva) {
     });
 }
 
-function devolverRecurso(idReserva) {
+function devolverRecurso(idReserva, idRecurso, nombreCat, nombreMod, numSerie) {
     finalizarReservaRPC(idReserva, function(resultado) {
         if (resultado) {
+            // Notificar via WS a sanitarios con reserva activa en ese recurso (Parte 3)
+            enviarAvisoWS({
+                action: 'notificar',
+                tipo: 'reserva',
+                accion: 'FINALIZADO',
+                idRecurso: idRecurso,
+                idSanitario: idSanitarioLogueado,
+                origen: nombreSanitarioLogueado,
+                nombreCategoria: nombreCat || '',
+                nombreModelo: nombreMod || '',
+                numSerie: numSerie || ''
+            });
             actualizarInicio();
         } else {
             alert("Error al devolver el recurso");
@@ -368,27 +410,48 @@ function hacerReserva(idRecurso, horasEstimadas) {
 }
 
 function retirarDirecto(idRecurso, horasEstimadas) {
-    // Primero reservamos y luego iniciamos directamente
-    reservarRecursoRPC(idRecurso, idSanitarioLogueado, horasEstimadas, function(idReserva) {
-        if (idReserva) {
-            iniciarReservaRPC(idReserva, function(resultado) {
-                if (resultado) {
-                    alert("Recurso retirado correctamente");
-                    cambiarSeccion('menu-principal');
-                    actualizarInicio();
-                }
-            });
-        } else {
-            alert("Error al retirar el recurso");
-        }
+    // Obtener datos del recurso ANTES de hacer la reserva (necesarios para el aviso WS)
+    obtenerRecursoRPC(idRecurso, function(recurso) {
+        var modeloObj = recurso ? modelosLocal.find(function(m) { return m.id === recurso.modelo; }) : null;
+        var nombreMod = modeloObj ? modeloObj.nom : '';
+        var catObj    = modeloObj ? categoriasLocal.find(function(c) { return c.id === modeloObj.categoria; }) : null;
+        var nombreCat = catObj ? catObj.nom : '';
+        var numSerie  = recurso ? recurso.num_serie : '';
+
+        reservarRecursoRPC(idRecurso, idSanitarioLogueado, horasEstimadas, function(idReserva) {
+            if (idReserva) {
+                iniciarReservaRPC(idReserva, function(resultado) {
+                    if (resultado) {
+                        // Notificar via WS a sanitarios con reserva activa en ese recurso (Parte 3)
+                        enviarAvisoWS({
+                            action: 'notificar',
+                            tipo: 'reserva',
+                            accion: 'INICIADO',
+                            idRecurso: idRecurso,
+                            idSanitario: idSanitarioLogueado,
+                            origen: nombreSanitarioLogueado,
+                            nombreCategoria: nombreCat,
+                            nombreModelo: nombreMod,
+                            numSerie: numSerie
+                        });
+                        alert("Recurso retirado correctamente");
+                        cambiarSeccion('menu-principal');
+                        actualizarInicio();
+                    }
+                });
+            } else {
+                alert("Error al retirar el recurso");
+            }
+        });
     });
 }
 
 // ======================================================================
 // RESEÑAS
 // ======================================================================
-function abrirResenya(idRecurso, numSerie) {
+function abrirResenya(idRecurso, numSerie, nombreCat, nombreMod) {
     idRecursoResenya = idRecurso;
+    datosRecursoResenya = { nombreCat: nombreCat || '', nombreMod: nombreMod || '', numSerie: numSerie };
     document.getElementById("resenya_recurso_serie").innerText = numSerie;
     document.getElementById("resenya_valor").value = "";
     document.getElementById("resenya_texto").value = "";
@@ -406,6 +469,17 @@ function guardarResenya() {
 
     crearResenyaRPC(idRecursoResenya, idSanitarioLogueado, valor, descripcion, function(idResenya) {
         if (idResenya) {
+            // Notificar via WS a todos los gestores (Parte 3)
+            enviarAvisoWS({
+                action: 'notificar',
+                tipo: 'resenya',
+                idRecurso: idRecursoResenya,
+                origen: nombreSanitarioLogueado,
+                nombreCategoria: datosRecursoResenya.nombreCat || '',
+                nombreModelo: datosRecursoResenya.nombreMod || '',
+                numSerie: datosRecursoResenya.numSerie || '',
+                puntuacion: valor
+            });
             alert("Reseña guardada correctamente");
             cambiarSeccion('menu-principal');
             actualizarInicio();
@@ -428,4 +502,57 @@ function formatearFecha(fechaString) {
     var mm = String(d.getMinutes()).padStart(2, '0');
     var ss = String(d.getSeconds()).padStart(2, '0');
     return `${dia}/${mes}/${anio} ${hh}:${mm}:${ss}`;
+}
+
+// =====================================================================
+// WEBSOCKET - PARTE 3: Sistema de Avisos (Sanitario)
+// =====================================================================
+
+// Abre la conexión WebSocket y registra al sanitario
+function abrirWsSanitario() {
+    if (wsSanitario) { wsSanitario.close(); }
+
+    wsSanitario = new WebSocket('ws://localhost:3502');
+
+    wsSanitario.onopen = function() {
+        // Registro como sanitario
+        wsSanitario.send(JSON.stringify({ action: 'register', tipo: 'sanitario', id: idSanitarioLogueado }));
+    };
+
+    // Recibir avisos del servidor (reservas + nuevos recursos para sanitarios)
+    wsSanitario.onmessage = function(evento) {
+        var aviso = JSON.parse(evento.data);
+        añadirAvisoTabla(aviso);
+    };
+
+    wsSanitario.onerror = function() {
+        console.warn('[WS] Error en la conexión WebSocket del sanitario');
+    };
+}
+
+// Envía un mensaje WS al servidor (p.ej. notificación de acción sobre reserva o reseña)
+function enviarAvisoWS(msg) {
+    if (wsSanitario && wsSanitario.readyState === WebSocket.OPEN) {
+        wsSanitario.send(JSON.stringify(msg));
+    }
+}
+
+// Añade una fila de aviso a la tabla de avisos
+function añadirAvisoTabla(aviso) {
+    var tbody = document.getElementById('tbody_avisos');
+    // Eliminar placeholder si existe
+    if (tbody.querySelector('em')) {
+        tbody.innerHTML = '';
+    }
+
+    var claseColor = aviso.color === 'rojo' ? 'aviso-rojo' :
+                     aviso.color === 'verde' ? 'aviso-verde' : 'aviso-azul';
+
+    var fila = '<tr class="' + claseColor + '">' +
+        '<td>' + aviso.fecha + '</td>' +
+        '<td>' + aviso.origen + '</td>' +
+        '<td>' + aviso.texto + '</td>' +
+        '</tr>';
+
+    tbody.innerHTML = fila + tbody.innerHTML; // más reciente arriba
 }

@@ -52,6 +52,12 @@
         }
 
         label { display: inline-block; width: 150px; margin-bottom: 5px; }
+
+        /* Colores para la tabla de avisos WebSocket */
+        .aviso-rojo  { background-color: #ffcccc; }
+        .aviso-azul  { background-color: #cce0ff; }
+        .aviso-verde { background-color: #ccffcc; }
+        #seccion-avisos { margin-top: 30px; border-top: 2px solid #aaa; padding-top: 10px; }
     </style>
 </head>
 
@@ -116,6 +122,23 @@
 
         <div style="margin-top: 20px;">
             <button onclick="abrirNuevaReserva()">Nueva Reserva</button>
+        </div>
+
+        <!-- AVISOS WEBSOCKET (Parte 3) -->
+        <div id="seccion-avisos">
+            <h3>Avisos</h3>
+            <table id="tabla_avisos">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Origen</th>
+                        <th>Texto del aviso</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody_avisos">
+                    <tr><td colspan="3"><em>Sin avisos recibidos aún</em></td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 

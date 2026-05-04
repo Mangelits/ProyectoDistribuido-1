@@ -1,4 +1,6 @@
 var idGestorLogueado = null; // Variable para guardarme luego el ID del gestor que ha iniciado sesión
+var nombreGestorLogueado = ''; // Para el origen en los avisos WS
+var wsGestor = null;           // Conexión WebSocket
 
 var categoriasLocal = [];
 var modelosLocal = [];      //Inicializo unas variables locales, para evitar muchas llamadar al servidor
@@ -82,7 +84,15 @@ function entrar() {
 }
 
 function salir() {
-    idGestorLogueado = null; //? Me limpio la variable del ID del gestor logueado
+    idGestorLogueado = null;
+    
+    // Cerrar WebSocket al salir (Parte 3)
+    if (wsGestor) {
+        wsGestor.close();
+        wsGestor = null;
+    }
+    // Limpiar avisos
+    document.getElementById('tbody_avisos').innerHTML = '<tr><td colspan="3"><em>Sin avisos recibidos aún</em></td></tr>';
     
     //? Limpio los campos de login y la tabla de recursos [para evitar que se vean datos del gestor anterior al volver a la pantalla de login]
     document.getElementById("login_user").value = "";
@@ -95,7 +105,12 @@ function salir() {
 function cargarDatosGestorEInicio() {
     rest.get("/api/gestores/" + idGestorLogueado, function(estado, respuesta) {
         if (estado === 200) {
-            document.getElementById("mensaje_bienvenida").innerText = "Bienvenido " + respuesta.nom + " " + respuesta.ape + " ";
+            nombreGestorLogueado = respuesta.nom + " " + respuesta.ape;
+            document.getElementById("mensaje_bienvenida").innerText = "Bienvenido " + nombreGestorLogueado + " ";
+            
+            // Abrir WebSocket al entrar (Parte 3)
+            abrirWsGestor();
+            
             cambiarSeccion("menu-principal");
         }
     });
@@ -280,6 +295,20 @@ function guardarRecurso() {
         // Crear nuevo (POST)
         rest.post("/api/recursos", datos, function(estado, respuesta) {
             if (estado === 201) {
+                // Notificar via WS a todos los sanitarios (Parte 3)
+                var modeloObj = modelosLocal.find(function(m) { return m.id === datos.modelo; });
+                var nombreMod = modeloObj ? modeloObj.nom : datos.modelo;
+                var catObj    = modeloObj ? categoriasLocal.find(function(c) { return c.id === modeloObj.categoria; }) : null;
+                var nombreCat = catObj ? catObj.nom : datos.modelo;
+                enviarAvisoWS({
+                    action: 'notificar',
+                    tipo: 'recurso',
+                    origen: nombreGestorLogueado,
+                    nombreCategoria: nombreCat,
+                    nombreModelo: nombreMod,
+                    numSerie: datos.num_serie
+                });
+
                 alert("Recurso creado");
                 cambiarSeccion("menu-principal");
                 buscarRecursos();
@@ -382,4 +411,57 @@ function formatearFecha(fechaString) { //? Convierte fecha ISO a formato PDF: dd
     
     // Formato estilo PDF: 12/04/25 14:30:50
     return `${dia}/${mes}/${anio} <br> ${hh}:${mm}:${ss}`;
+}
+
+// =====================================================================
+// WEBSOCKET - PARTE 3: Sistema de Avisos (Gestor)
+// =====================================================================
+
+// Abre la conexión WebSocket y registra al gestor
+function abrirWsGestor() {
+    if (wsGestor) { wsGestor.close(); }
+
+    wsGestor = new WebSocket('ws://localhost:3502');
+
+    wsGestor.onopen = function() {
+        // Registro como gestor
+        wsGestor.send(JSON.stringify({ action: 'register', tipo: 'gestor', id: idGestorLogueado }));
+    };
+
+    // Recibir avisos del servidor (solo reseñas para gestores)
+    wsGestor.onmessage = function(evento) {
+        var aviso = JSON.parse(evento.data);
+        añadirAvisoTabla(aviso);
+    };
+
+    wsGestor.onerror = function() {
+        console.warn('[WS] Error en la conexión WebSocket del gestor');
+    };
+}
+
+// Envía un mensaje WS al servidor (p.ej. notificación de recurso creado)
+function enviarAvisoWS(msg) {
+    if (wsGestor && wsGestor.readyState === WebSocket.OPEN) {
+        wsGestor.send(JSON.stringify(msg));
+    }
+}
+
+// Añade una fila de aviso a la tabla de avisos
+function añadirAvisoTabla(aviso) {
+    var tbody = document.getElementById('tbody_avisos');
+    // Eliminar placeholder si existe
+    if (tbody.querySelector('em')) {
+        tbody.innerHTML = '';
+    }
+
+    var claseColor = aviso.color === 'rojo' ? 'aviso-rojo' :
+                     aviso.color === 'verde' ? 'aviso-verde' : 'aviso-azul';
+
+    var fila = '<tr class="' + claseColor + '">' +
+        '<td>' + aviso.fecha + '</td>' +
+        '<td>' + aviso.origen + '</td>' +
+        '<td>' + aviso.texto + '</td>' +
+        '</tr>';
+
+    tbody.innerHTML = fila + tbody.innerHTML; // más reciente arriba
 }

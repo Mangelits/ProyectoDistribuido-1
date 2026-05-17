@@ -138,33 +138,75 @@ function obtenerRecurso(idRecurso, callback) {
 }
 
 
-//* TIEMPO PENDIENTE calcula cuántas horas faltan para que un recurso esté libre
-// Devuelve horas restantes, o 0 si ya está disponible
+//* TIEMPO PENDIENTE calcula cuántas horas faltan para que un recurso esté físicamente libre
+// IMPORTANTE: solo cuentan las reservas EN USO (fecha_inicio puesta, fecha_fin nula).
+// Las pendientes (sin fecha_inicio) NO bloquean el recurso: están en cola, esperando turno.
+// Si las metiéramos en el cálculo, la propia reserva pendiente del sanitario se
+// bloquearía a sí misma y el botón "Retirar" no aparecería nunca al liberarse el recurso.
 function tiempoPendiente(idRecurso, callback) {
     var ahora = new Date();
- 
-    // Busco todas las reservas activas o pendientes de ese recurso
-    // (tienen fecha_inicio pero no fecha_fin, o no tienen fecha_inicio aún)
-    var reservasActivas = reservas.filter(r => r.recurso === idRecurso && !r.fecha_fin);
- 
+
+    var reservasActivas = reservas.filter(r =>
+        r.recurso === idRecurso && r.fecha_inicio && !r.fecha_fin
+    );
+
     if (reservasActivas.length === 0) {
-        return callback(0); // ninguna reserva activa -> disponible
+        return callback(0); // nadie lo está usando -> físicamente libre
     }
- 
+
     // Calculo la fecha más lejana estimada de devolución
     var tiempoMaxFin = ahora;
 
     reservasActivas.forEach(r => {
-        var base = r.fecha_inicio ? new Date(r.fecha_inicio) : ahora;
+        var base = new Date(r.fecha_inicio);
         var estimadoFin = new Date(base.getTime() + r.horas_estimadas * 60 * 60 * 1000);
         if (estimadoFin > tiempoMaxFin) {
             tiempoMaxFin = estimadoFin;
         }
     });
- 
+
     // Horas restantes desde ahora hasta el fin estimado más lejano
     var horasRestantes = (tiempoMaxFin - ahora) / (1000 * 60 * 60);
     callback(Math.max(0, Math.round(horasRestantes * 10) / 10));
+}
+
+//* RECURSO DISPONIBLE comprueba si un recurso se puede retirar AHORA mismo sin reservar antes
+// Solo es true si nadie lo está usando Y no hay nadie en cola esperándolo.
+// Lo usa el buscador para decidir entre mostrar "Retirar" o "Reservar".
+function recursoDisponible(idRecurso, callback) {
+    var enUso = reservas.find(r =>
+        r.recurso === idRecurso && r.fecha_inicio && !r.fecha_fin
+    );
+    if (enUso) {
+        return callback(false);
+    }
+    var enCola = reservas.find(r =>
+        r.recurso === idRecurso && !r.fecha_inicio
+    );
+    callback(!enCola);
+}
+
+//* PUEDE RETIRAR RESERVA comprueba si una reserva pendiente concreta puede retirarse YA
+// Condiciones: la reserva existe, sigue pendiente, el recurso no está en uso por nadie,
+// y esta reserva es la más antigua (por fecha_peticion) de la cola de ese recurso.
+function puedeRetirarReserva(idReserva, callback) {
+    var reserva = reservas.find(r => r.id === idReserva);
+    if (!reserva || reserva.fecha_inicio) {
+        return callback(false);
+    }
+
+    var enUso = reservas.find(r =>
+        r.recurso === reserva.recurso && r.fecha_inicio && !r.fecha_fin
+    );
+    if (enUso) {
+        return callback(false);
+    }
+
+    var pendientesDelRecurso = reservas
+        .filter(r => r.recurso === reserva.recurso && !r.fecha_inicio)
+        .sort((a, b) => new Date(a.fecha_peticion) - new Date(b.fecha_peticion));
+
+    callback(pendientesDelRecurso.length > 0 && pendientesDelRecurso[0].id === idReserva);
 }
 
 //* OBTENER RESERVAS devuelve todas las reservas de un sanitario
@@ -230,12 +272,35 @@ function cancelarReserva(idReserva, callback) {
 }
 
 //* INICIAR RESERVA el sanitario retira el recurso físicamente
+// Validamos en servidor: no se puede iniciar si ya estaba iniciada, si el recurso lo está
+// usando otra reserva, o si hay una reserva pendiente más antigua (cola FIFO por fecha_peticion).
 function iniciarReserva(idReserva, callback) {
-    var reserva = reservas.find(r => r.id === idReserva); // Compruebo que la reserva existe
+    var reserva = reservas.find(r => r.id === idReserva);
     if (!reserva) {
-        return callback(null); // No existe la reserva, no se puede iniciar
+        return callback(null); // No existe
     }
-    reserva.fecha_inicio = new Date(); // Se asigna la fecha de inicio (momento en que se retira el recurso)
+    if (reserva.fecha_inicio) {
+        return callback(null); // Ya estaba iniciada
+    }
+
+    var enUso = reservas.find(r =>
+        r.recurso === reserva.recurso && r.fecha_inicio && !r.fecha_fin && r.id !== reserva.id
+    );
+    if (enUso) {
+        return callback(null); // El recurso está en uso por otra reserva
+    }
+
+    var hayAnteriorEnCola = reservas.some(r =>
+        r.recurso === reserva.recurso &&
+        !r.fecha_inicio &&
+        r.id !== reserva.id &&
+        new Date(r.fecha_peticion) < new Date(reserva.fecha_peticion)
+    );
+    if (hayAnteriorEnCola) {
+        return callback(null); // No es su turno en la cola
+    }
+
+    reserva.fecha_inicio = new Date();
     callback(true);
 }
 
@@ -265,6 +330,8 @@ app.registerAsync(obtenerSanitario);
 app.registerAsync(obtenerRecursos);
 app.registerAsync(obtenerRecurso);
 app.registerAsync(tiempoPendiente);
+app.registerAsync(recursoDisponible);
+app.registerAsync(puedeRetirarReserva);
 app.registerAsync(obtenerReservas);
 app.registerAsync(obtenerResenyas);
 app.registerAsync(crearResenya);

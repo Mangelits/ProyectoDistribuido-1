@@ -28,6 +28,8 @@ var obtenerModsRPC     = appRPC.procedure("obtenerModelos");
 var obtenerRecursosRPC = appRPC.procedure("obtenerRecursos");
 var obtenerRecursoRPC  = appRPC.procedure("obtenerRecurso");
 var tiempoPendienteRPC = appRPC.procedure("tiempoPendiente");
+var recursoDisponibleRPC = appRPC.procedure("recursoDisponible");
+var puedeRetirarReservaRPC = appRPC.procedure("puedeRetirarReserva");
 var obtenerReservasRPC = appRPC.procedure("obtenerReservas");
 var obtenerResenyasRPC = appRPC.procedure("obtenerResenyas");
 var crearResenyaRPC    = appRPC.procedure("crearResenya");
@@ -193,26 +195,29 @@ function cargarTablaPendientes(pendientes) {
             var catObj      = modeloObj ? categoriasLocal.find(c => c.id === modeloObj.categoria) : null;
             var nombreCat   = catObj ? catObj.nom : recurso.modelo;
 
+            // horas = tiempo hasta que el recurso esté FÍSICAMENTE libre (solo cuenta lo "en uso")
+            // puedeRetirar = además de estar libre, soy yo el primero de la cola FIFO
             tiempoPendienteRPC(reserva.recurso, function(horas) {
-                var horasTexto  = horas > 0 ? horas + "h" : "0";
-                // Pasar datos del recurso para la notificación WS (Parte 3)
-                var botonRetirar = horas === 0
-                    ? `<button onclick="retirarRecurso('${reserva.id}','${reserva.recurso}','${nombreCat}','${nombreMod}','${recurso.num_serie}')">Retirar</button> `
-                    : "";
+                puedeRetirarReservaRPC(reserva.id, function(puedeRetirar) {
+                    var horasTexto = horas > 0 ? horas + "h" : "0";
+                    var botonRetirar = puedeRetirar
+                        ? `<button onclick="retirarRecurso('${reserva.id}','${reserva.recurso}','${nombreCat}','${nombreMod}','${recurso.num_serie}')">Retirar</button> `
+                        : "";
 
-                var fila = `<tr>
-                    <td>${nombreCat}</td>
-                    <td>${nombreMod}</td>
-                    <td>${recurso.num_serie}</td>
-                    <td>${recurso.ubi}</td>
-                    <td>${formatearFecha(reserva.fecha_peticion)}</td>
-                    <td>${horasTexto}</td>
-                    <td>
-                        ${botonRetirar}
-                        <button onclick="cancelarReserva('${reserva.id}')">X</button>
-                    </td>
-                </tr>`;
-                tbody.innerHTML += fila;
+                    var fila = `<tr>
+                        <td>${nombreCat}</td>
+                        <td>${nombreMod}</td>
+                        <td>${recurso.num_serie}</td>
+                        <td>${recurso.ubi}</td>
+                        <td>${formatearFecha(reserva.fecha_peticion)}</td>
+                        <td>${horasTexto}</td>
+                        <td>
+                            ${botonRetirar}
+                            <button onclick="cancelarReserva('${reserva.id}')">X</button>
+                        </td>
+                    </tr>`;
+                    tbody.innerHTML += fila;
+                });
             });
         });
     });
@@ -363,34 +368,39 @@ function buscarRecursosSanitario() {
         }
 
         recursos.forEach(function(recurso) {
-            // Para cada recurso calculamos su tiempo pendiente y su valoración media
+            // Pedimos: tiempo de espera (basado solo en lo que está en uso),
+            // disponibilidad real (libre y sin cola) y reseñas para la media.
             tiempoPendienteRPC(recurso.id, function(horas) {
-                obtenerResenyasRPC(recurso.id, function(resenyas) {
-                    // Valoración media
-                    var valoracionMedia = "Sin reseñas";
-                    if (resenyas.length > 0) {
-                        var suma = resenyas.reduce((acc, r) => acc + r.valor, 0);
-                        valoracionMedia = (suma / resenyas.length).toFixed(1);
-                    }
+                recursoDisponibleRPC(recurso.id, function(disponibleAhora) {
+                    obtenerResenyasRPC(recurso.id, function(resenyas) {
+                        // Valoración media
+                        var valoracionMedia = "Sin reseñas";
+                        if (resenyas.length > 0) {
+                            var suma = resenyas.reduce((acc, r) => acc + r.valor, 0);
+                            valoracionMedia = (suma / resenyas.length).toFixed(1);
+                        }
 
-                    // Disponibilidad y botón de acción
-                    var disponibilidad, botonAccion;
-                    if (horas === 0) {
-                        disponibilidad = "Disponible";
-                        botonAccion = `<button onclick="retirarDirecto('${recurso.id}', ${tiempoEstimado})">Retirar</button>`;
-                    } else {
-                        disponibilidad = horas + "h";
-                        botonAccion = `<button onclick="hacerReserva('${recurso.id}', ${tiempoEstimado})">Reservar</button>`;
-                    }
+                        // Solo se puede "Retirar" directamente si nadie lo usa Y nadie está en cola.
+                        // Si está físicamente libre pero alguien tiene una reserva pendiente,
+                        // hay que respetar el turno: el nuevo sanitario solo puede "Reservar".
+                        var disponibilidad, botonAccion;
+                        if (disponibleAhora) {
+                            disponibilidad = "Disponible";
+                            botonAccion = `<button onclick="retirarDirecto('${recurso.id}', ${tiempoEstimado})">Retirar</button>`;
+                        } else {
+                            disponibilidad = horas > 0 ? horas + "h" : "En cola";
+                            botonAccion = `<button onclick="hacerReserva('${recurso.id}', ${tiempoEstimado})">Reservar</button>`;
+                        }
 
-                    var fila = `<tr>
-                        <td>${recurso.num_serie}</td>
-                        <td>${recurso.ubi}</td>
-                        <td>${disponibilidad}</td>
-                        <td>${valoracionMedia}</td>
-                        <td>${botonAccion}</td>
-                    </tr>`;
-                    tbody.innerHTML += fila;
+                        var fila = `<tr>
+                            <td>${recurso.num_serie}</td>
+                            <td>${recurso.ubi}</td>
+                            <td>${disponibilidad}</td>
+                            <td>${valoracionMedia}</td>
+                            <td>${botonAccion}</td>
+                        </tr>`;
+                        tbody.innerHTML += fila;
+                    });
                 });
             });
         });
@@ -437,6 +447,13 @@ function retirarDirecto(idRecurso, horasEstimadas) {
                         alert("Recurso retirado correctamente");
                         cambiarSeccion('menu-principal');
                         actualizarInicio();
+                    } else {
+                        // Carrera: otro sanitario se nos ha adelantado entre el render y el click.
+                        // Limpiamos la reserva pendiente recién creada para no dejar basura.
+                        cancelarReservaRPC(idReserva, function() {
+                            alert("Otro sanitario se ha adelantado. Inténtalo de nuevo.");
+                            actualizarInicio();
+                        });
                     }
                 });
             } else {

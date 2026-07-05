@@ -1,5 +1,6 @@
 // node servidor.js
 var express = require("express");
+var path = require("path");
 var app = express();
 
 var datosServidor = require('./datos.js');
@@ -53,8 +54,9 @@ var recursos = datosServidor.recursos;
 var reservas = datosServidor.reservas;
 var resenyas = datosServidor.resenyas;
 
-app.use("/appCliente", express.static("cliente_rest")); 
-app.use(express.json()); 
+app.use("/appCliente", express.static(path.join(__dirname, "cliente_rest")));
+app.use("/appSanitario", express.static(path.join(__dirname, "cliente_rpc")));
+app.use(express.json());
 
 
 // ======================================================================

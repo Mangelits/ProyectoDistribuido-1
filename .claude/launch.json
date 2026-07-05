@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "servidor",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["app/servidor.js"],
+      "port": 3000
+    }
+  ]
+}

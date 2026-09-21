@@ -114,7 +114,7 @@
 
 
 var WebSocket = require('ws');             // Librería de WebSockets para Node.
-var datos     = require('./datos.js');     // Acceso al array de reservas (compartido en memoria con REST/RPC).
+var bd        = require('./bd.js');        // Conexión a la BD (antes: array de reservas de datos.js).
 
 // ---------------------------------------------------------------------
 // ESTADO EN MEMORIA: lista de clientes conectados al servidor WS.
@@ -280,53 +280,53 @@ function procesarNotificacion(msg) {
     else if (msg.tipo === 'reserva') {
         console.log('[WS] Procesando aviso reserva. idRecurso:', msg.idRecurso, 'accion:', msg.accion);
 
-        // 1) Sacamos del modelo (datos.js) las reservas NO finalizadas
-        //    sobre ese recurso. fecha_fin null == reserva todavía viva
-        //    (puede estar en uso o en cola, da igual: nos interesan
-        //    ambos casos para avisar).
-        var reservasActivas = datos.reservas.filter(function(r) {
-            return r.recurso === msg.idRecurso && !r.fecha_fin;
-            });
-            
-        // 2) Extraemos los ids de los sanitarios afectados.
-        var idsSanitariosAfectados = reservasActivas.map(function(r) { return r.sanitario; });
+        // 1) AHORA la lista de reservas está en la BD, no en un array.
+        //    La consulta es ASÍNCRONA, así que todo el fan-out se hace
+        //    DENTRO del .then (cuando la respuesta llega). fecha_fin NULL
+        //    == reserva todavía viva (en uso o en cola: ambas nos valen).
+        bd.query("SELECT sanitario FROM reservas WHERE recurso = ? AND fecha_fin IS NULL", [msg.idRecurso])
+          .then(function(resultado) {
+            var reservasActivas = resultado[0];
 
-        // 3) Garantizamos que el propio actor también recibe la
-        //    confirmación del evento, aunque su reserva ya esté
-        //    finalizada (p.ej. acaba de devolver el recurso y por
-        //    tanto su reserva tiene fecha_fin: ya no entra en el
-        //    filter anterior, pero queremos que vea el aviso).
-        if (msg.idSanitario && !idsSanitariosAfectados.includes(msg.idSanitario)) {
-            idsSanitariosAfectados.push(msg.idSanitario);
-        }
+            // 2) Ids de los sanitarios afectados. Los normalizamos a String
+            //    porque en la BD son números y el id registrado por WS puede
+            //    llegar como número o texto; así el .includes nunca falla.
+            var idsSanitariosAfectados = reservasActivas.map(function(r) { return String(r.sanitario); });
 
-        console.log('[WS] Sanitarios afectados:', idsSanitariosAfectados);
-        console.log('[WS] Clientes conectados:', clientes.map(function(c){ return c.tipo+':'+c.id; }));
-
-        // 4) Construimos el texto del aviso. msg.accion suele ser
-        //    'INICIADO' o 'FINALIZADO'; si no llegara, ponemos un
-        //    valor genérico para no romper la frase.
-        var accion = msg.accion || 'MODIFICADO';
-        var texto = 'SE HA ' + accion + ' LA RESERVA DEL ' +
-            msg.nombreCategoria.toUpperCase() + ' MODELO ' +
-            msg.nombreModelo.toUpperCase() + ' CON CÓDIGO ' + msg.numSerie;
-
-        var aviso = JSON.stringify({ color: 'rojo', fecha: ahora, origen: origen, texto: texto });
-
-        // 5) Fan-out selectivo: solo a sanitarios cuyo id está en la
-        //    lista de afectados y cuyo socket esté OPEN. Contamos los
-        //    envíos para log/diagnóstico.
-        var enviados = 0;
-        clientes.forEach(function(c) {
-            if (c.tipo === 'sanitario' &&
-                idsSanitariosAfectados.includes(c.id) &&
-                c.ws.readyState === WebSocket.OPEN) {
-                c.ws.send(aviso);
-                enviados++;
+            // 3) El propio actor también recibe la confirmación, aunque su
+            //    reserva ya esté finalizada (acaba de devolver: tiene fecha_fin
+            //    y ya no entra en el filtro anterior, pero debe ver el aviso).
+            if (msg.idSanitario && !idsSanitariosAfectados.includes(String(msg.idSanitario))) {
+                idsSanitariosAfectados.push(String(msg.idSanitario));
             }
-        });
 
-        console.log('[WS] Aviso reserva enviado a', enviados, 'sanitarios.');
+            console.log('[WS] Sanitarios afectados:', idsSanitariosAfectados);
+            console.log('[WS] Clientes conectados:', clientes.map(function(c){ return c.tipo+':'+c.id; }));
+
+            // 4) Texto del aviso. msg.accion suele ser 'INICIADO'/'FINALIZADO'.
+            var accion = msg.accion || 'MODIFICADO';
+            var texto = 'SE HA ' + accion + ' LA RESERVA DEL ' +
+                msg.nombreCategoria.toUpperCase() + ' MODELO ' +
+                msg.nombreModelo.toUpperCase() + ' CON CÓDIGO ' + msg.numSerie;
+
+            var aviso = JSON.stringify({ color: 'rojo', fecha: ahora, origen: origen, texto: texto });
+
+            // 5) Fan-out selectivo: solo a sanitarios afectados con socket OPEN.
+            var enviados = 0;
+            clientes.forEach(function(c) {
+                if (c.tipo === 'sanitario' &&
+                    idsSanitariosAfectados.includes(String(c.id)) &&
+                    c.ws.readyState === WebSocket.OPEN) {
+                    c.ws.send(aviso);
+                    enviados++;
+                }
+            });
+
+            console.log('[WS] Aviso reserva enviado a', enviados, 'sanitarios.');
+          })
+          .catch(function(err) {
+            console.error('[WS] Error consultando reservas para el aviso:', err.message);
+          });
     }
 
     // -----------------------------------------------------------------

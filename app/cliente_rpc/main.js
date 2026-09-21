@@ -348,7 +348,9 @@ function cargarModelos() {
     obtenerModsRPC(function(modelos) {
         var select = document.getElementById("filtro_modelo");
         select.innerHTML = "";
-        var modelosFiltrados = modelos.filter(m => m.categoria === idCategoria);
+        // == (no ===): el value del <select> es texto ("3") y m.categoria
+        // viene de la BD como número (3). Comparación laxa para que cuadren.
+        var modelosFiltrados = modelos.filter(m => m.categoria == idCategoria);
         modelosFiltrados.forEach(function(mod) {
             select.innerHTML += `<option value="${mod.id}">${mod.nom}</option>`;
         });

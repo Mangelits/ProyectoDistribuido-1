@@ -1,328 +1,268 @@
 //Es necesario instalar en la carpeta del servidor los modulos cors y express
 
 var rpc = require("./rpc.js"); //incorporamos la libreria
-var datos=require("./datos.js")
+var bd  = require("./bd.js");  // conexión a la base de datos (antes: datos.js)
 
 
 // ======================================================================
-//? RPC (Remote Procedure Call) es un mecanismo de comunicación que permite
-//? al cliente llamar a funciones que están definidas y se ejecutan en el servidor,
-//? como si fueran funciones locales. El cliente NO sabe cómo están implementadas,
-//? solo las llama pasando argumentos y esperando un resultado (callback).
+//? RPC (Remote Procedure Call): el cliente llama a funciones del servidor
+//? como si fueran locales, pasando argumentos y esperando un resultado.
+// ======================================================================
 //
-//* FLUJO GENERAL:
-//*   1. El servidor define funciones (procedimientos)
-//*   2. Las registra en una "app" con un nombre
-//*   3. El cliente se conecta a esa app por su nombre y llama a los procedimientos
-// ======================================================================
-
-
-// ======================================================================
-// DATOS INICIALES datos.js
-// ======================================================================
-var sanitarios = datos.sanitarios;
-var categorias = datos.categorias;
-var modelos = datos.modelos;
-var recursos = datos.recursos;
-var reservas = datos.reservas;
-var resenyas = datos.resenyas;
-
-// ======================================================================
-//* PROCEDIMIENTOS RPC
-// ======================================================================
-//? Hay DOS tipos de procedimientos según cómo devuelven el resultado:
+//* ¡¡IMPORTANTE TRAS PASAR A BASE DE DATOS!!
+//  Una consulta a la BD NO devuelve el resultado en la misma línea: tarda
+//  (viaja por la red a MariaDB). Por eso NINGÚN procedimiento puede ser ya
+//  SÍNCRONO (registerSync + return): en cuanto se toca la BD, el resultado
+//  llega "más tarde" y hay que entregarlo por el CALLBACK (registerAsync).
 //
-//* SÍNCRONOS (registerSync): la función devuelve el resultado con RETURN.
-//   Se usan cuando el resultado está disponible inmediatamente.
-//   function miFuncion() { return datos; }
+//  -> obtenerCategorias y obtenerModelos, que antes eran registerSync,
+//     AHORA son registerAsync (reciben callback). Este es el cambio que
+//     más se olvida y no da error: simplemente devolvería undefined.
 //
-//* ASÍNCRONOS (registerAsync): la función recibe un CALLBACK como último
-//   argumento y lo llama cuando tiene el resultado.
-//   function miFuncion(arg1, arg2, callback) { callback(resultado); }
+//  Con la versión de promesas del driver usamos:
+//     bd.query("SELECT ...", [params])
+//        .then(([filas]) => callback(filas))
+//        .catch(()       => callback(<valor de error>));
 // ======================================================================
- 
-//? --- Sincrono: devuelve con return ---
+
+
+//? --- Antes SÍNCRONOS, AHORA asíncronos (con callback) ---
 
 // Devuelve el array completo de categorías
-function obtenerCategorias() {
-    return categorias;
+function obtenerCategorias(callback) {
+    bd.query("SELECT * FROM categorias")
+      .then(([filas]) => callback(filas))
+      .catch(() => callback([]));
 }
 
 // Devuelve el array completo de modelos
-function obtenerModelos() {
-    return modelos;
+function obtenerModelos(callback) {
+    bd.query("SELECT * FROM modelos")
+      .then(([filas]) => callback(filas))
+      .catch(() => callback([]));
 }
- 
-//? --- Asincrono: devuelve con callback ---
+
+//? --- Asíncronos: devuelven con callback ---
 
 function loginSanitario(user, password, callback) {
-    // .find() recorre el array y devuelve el PRIMER objeto que cumpla la condición
-    // Si no encuentra ninguno, devuelve undefined (falsy)
-    var sanitario = sanitarios.find(s => s.user === user && s.pswd === password);
-    // Si sanitario existe -> devuelve su id, si no -> null
-    callback(sanitario ? sanitario.id : null);
+    bd.query("SELECT * FROM sanitarios WHERE user = ? AND pswd = ?", [user, password])
+      .then(([filas]) => callback(filas.length > 0 ? filas[0].id : null))
+      .catch(() => callback(null));
 }
- 
-//* REGISTRO DE NUEVO SANITARIO
-// Se comprueba que el login no esté ya en uso (debe ser único) (AG1, MAAR, etc...)
-// Devuelve: el id del nuevo sanitario (último ID (tamaño de la lista de sanitarios) + 1), o null si el login ya existe
+
+//* REGISTRO DE NUEVO SANITARIO (el login debe ser único)
+// Devuelve: el id nuevo (lo asigna AUTO_INCREMENT) o null si el login ya existe
 function crearSanitario(datosSanitario, callback) {
-    var existe = sanitarios.find(s => s.user === datosSanitario.user);
-    if (existe) {
-        return callback(null); // Login ya en uso, no se crea el sanitario
-    }
- 
-    var nuevoId = (sanitarios.length + 1).toString(); // Lo guardo en String por que todos los id los tengo como string, aunque sean números
-    var nuevo = {
-        id: nuevoId,
-        nom: datosSanitario.nom,
-        ape: datosSanitario.ape,
-        user: datosSanitario.user,
-        pswd: datosSanitario.pswd
-    };
-    sanitarios.push(nuevo); // El método push() añade un nuevo elemento al final del array
-    callback(nuevoId);
+    bd.query("SELECT id FROM sanitarios WHERE user = ?", [datosSanitario.user])
+      .then(([existe]) => {
+          if (existe.length > 0) return callback(null); // login ya en uso
+          return bd.query(
+              "INSERT INTO sanitarios (nom, ape, user, pswd) VALUES (?, ?, ?, ?)",
+              [datosSanitario.nom, datosSanitario.ape, datosSanitario.user, datosSanitario.pswd]
+          ).then(([resultado]) => callback(resultado.insertId)); // id generado
+      })
+      .catch(() => callback(null));
 }
 
 //* EDITAR DATOS DE UN SANITARIO
-// Devuelve: true si se actualizó bien, null si no existe o el login ya está en uso
+// Devuelve: true si se actualizó, null si no existe o el login ya está en uso por otro
 function actualizarSanitario(idSanitario, datosSanitario, callback) {
-    // .findIndex() devuelve la POSICIÓN en el array, o -1 si no lo encuentra
-    // Utilizo la posición para poder modificar: sanitarios[indice].nom = ...
-    var indice = sanitarios.findIndex(s => s.id === idSanitario);
-    if (indice === -1) {
-        return callback(null); // No existe el sanitario, no se puede actualizar
-    }
- 
-    // Se puede dar el caso que eliga un login que ya esté en uso por otro sanitario, lo cual no se puede (LOGIN UNICO (AG1, MAAR, etc...))
-    // (el propio puede mantener su login actual, por eso s.id !== idSanitario)
-    var loginDuplicado = sanitarios.find(s => s.user === datosSanitario.user && s.id !== idSanitario);
-    if (loginDuplicado) {
-        return callback(null); // Login ya en uso por otro sanitario, no se puede actualizar
-    }
- 
-    sanitarios[indice].nom = datosSanitario.nom;
-    sanitarios[indice].ape = datosSanitario.ape;
-    sanitarios[indice].user = datosSanitario.user;
-    sanitarios[indice].pswd = datosSanitario.pswd;
- 
-    callback(true);
+    bd.query("SELECT id FROM sanitarios WHERE id = ?", [idSanitario])
+      .then(([existe]) => {
+          if (existe.length === 0) return callback(null); // no existe
+          return bd.query(
+              "SELECT id FROM sanitarios WHERE user = ? AND id <> ?",
+              [datosSanitario.user, idSanitario]
+          ).then(([duplicado]) => {
+              if (duplicado.length > 0) return callback(null); // login en uso por otro
+              return bd.query(
+                  "UPDATE sanitarios SET nom = ?, ape = ?, user = ?, pswd = ? WHERE id = ?",
+                  [datosSanitario.nom, datosSanitario.ape, datosSanitario.user, datosSanitario.pswd, idSanitario]
+              ).then(() => callback(true));
+          });
+      })
+      .catch(() => callback(null));
 }
 
-
-//* OBTENER DATOS devuelve los datos de un sanitario SIN la contraseña
-//? Devuelve: objeto con id, nom, ape, user — o null si no existe
-
+//* OBTENER DATOS de un sanitario SIN la contraseña
 function obtenerSanitario(idSanitario, callback) {
-    var sanitario = sanitarios.find(s => s.id === idSanitario);
-    if (!sanitario) {
-        return callback(null); // No existe el sanitario, no se pueden obtener los datos
-    }
-    // Devuelve todo menos la contraseña (pswd)
-    callback({ id: sanitario.id, nom: sanitario.nom, ape: sanitario.ape, user: sanitario.user });
+    bd.query("SELECT id, nom, ape, user FROM sanitarios WHERE id = ?", [idSanitario])
+      .then(([filas]) => callback(filas.length > 0 ? filas[0] : null))
+      .catch(() => callback(null));
 }
 
-
-//* BUSCAR RECURSOS devuelve los recursos operativos de un modelo
+//* BUSCAR RECURSOS operativos (estado "0") de un modelo
 function obtenerRecursos(idModelo, callback) {
-    // Solo recursos operativos (estado "0") del modelo pedido
-    var resultado = recursos.filter(r => r.modelo === idModelo && r.estado === "0");
-    callback(resultado);
+    bd.query("SELECT * FROM recursos WHERE modelo = ? AND estado = '0'", [idModelo])
+      .then(([filas]) => callback(filas))
+      .catch(() => callback([]));
 }
 
-//* OBTENER UN RECURSO
-// Si no esiste pues devuelve null, si existe devuelve el recurso completo (con su estado, modelo, etc...)
+//* OBTENER UN RECURSO (null si no existe)
 function obtenerRecurso(idRecurso, callback) {
-    var recurso = recursos.find(r => r.id === idRecurso);
-    callback(recurso || null);
+    bd.query("SELECT * FROM recursos WHERE id = ?", [idRecurso])
+      .then(([filas]) => callback(filas.length > 0 ? filas[0] : null))
+      .catch(() => callback(null));
 }
 
-
-//* TIEMPO PENDIENTE calcula cuántas horas faltan para que un recurso esté físicamente libre
-// IMPORTANTE: solo cuentan las reservas EN USO (fecha_inicio puesta, fecha_fin nula).
-// Las pendientes (sin fecha_inicio) NO bloquean el recurso: están en cola, esperando turno.
-// Si las metiéramos en el cálculo, la propia reserva pendiente del sanitario se
-// bloquearía a sí misma y el botón "Retirar" no aparecería nunca al liberarse el recurso.
+//* TIEMPO PENDIENTE: horas que faltan para que el recurso esté físicamente libre.
+// Solo cuentan las reservas EN USO (fecha_inicio puesta, fecha_fin nula).
+// Traemos esas filas de la BD y hacemos el cálculo en JS (idéntico al original).
 function tiempoPendiente(idRecurso, callback) {
-    var ahora = new Date();
+    bd.query(
+        "SELECT * FROM reservas WHERE recurso = ? AND fecha_inicio IS NOT NULL AND fecha_fin IS NULL",
+        [idRecurso]
+    )
+    .then(([reservasActivas]) => {
+        if (reservasActivas.length === 0) return callback(0); // libre
 
-    var reservasActivas = reservas.filter(r =>
-        r.recurso === idRecurso && r.fecha_inicio && !r.fecha_fin
-    );
+        var ahora = new Date();
+        var tiempoMaxFin = ahora;
+        reservasActivas.forEach(r => {
+            var base = new Date(r.fecha_inicio);
+            var estimadoFin = new Date(base.getTime() + r.horas_estimadas * 60 * 60 * 1000);
+            if (estimadoFin > tiempoMaxFin) tiempoMaxFin = estimadoFin;
+        });
 
-    if (reservasActivas.length === 0) {
-        return callback(0); // nadie lo está usando -> físicamente libre
-    }
-
-    // Calculo la fecha más lejana estimada de devolución
-    var tiempoMaxFin = ahora;
-
-    reservasActivas.forEach(r => {
-        var base = new Date(r.fecha_inicio);
-        var estimadoFin = new Date(base.getTime() + r.horas_estimadas * 60 * 60 * 1000);
-        if (estimadoFin > tiempoMaxFin) {
-            tiempoMaxFin = estimadoFin;
-        }
-    });
-
-    // Horas restantes desde ahora hasta el fin estimado más lejano
-    var horasRestantes = (tiempoMaxFin - ahora) / (1000 * 60 * 60);
-    callback(Math.max(0, Math.round(horasRestantes * 10) / 10));
+        var horasRestantes = (tiempoMaxFin - ahora) / (1000 * 60 * 60);
+        callback(Math.max(0, Math.round(horasRestantes * 10) / 10));
+    })
+    .catch(() => callback(0));
 }
 
-//* RECURSO DISPONIBLE comprueba si un recurso se puede retirar AHORA mismo sin reservar antes
-// Solo es true si nadie lo está usando Y no hay nadie en cola esperándolo.
-// Lo usa el buscador para decidir entre mostrar "Retirar" o "Reservar".
+//* RECURSO DISPONIBLE: true solo si nadie lo usa Y nadie está en cola.
 function recursoDisponible(idRecurso, callback) {
-    var enUso = reservas.find(r =>
-        r.recurso === idRecurso && r.fecha_inicio && !r.fecha_fin
-    );
-    if (enUso) {
-        return callback(false);
-    }
-    var enCola = reservas.find(r =>
-        r.recurso === idRecurso && !r.fecha_inicio
-    );
-    callback(!enCola);
+    // ¿Alguien lo está usando? (inicio puesto, fin nulo)
+    bd.query(
+        "SELECT id FROM reservas WHERE recurso = ? AND fecha_inicio IS NOT NULL AND fecha_fin IS NULL",
+        [idRecurso]
+    )
+    .then(([enUso]) => {
+        if (enUso.length > 0) return callback(false);
+        // ¿Alguien en cola? (sin fecha_inicio)
+        return bd.query(
+            "SELECT id FROM reservas WHERE recurso = ? AND fecha_inicio IS NULL",
+            [idRecurso]
+        ).then(([enCola]) => callback(enCola.length === 0));
+    })
+    .catch(() => callback(false));
 }
 
-//* PUEDE RETIRAR RESERVA comprueba si una reserva pendiente concreta puede retirarse YA
-// Condiciones: la reserva existe, sigue pendiente, el recurso no está en uso por nadie,
-// y esta reserva es la más antigua (por fecha_peticion) de la cola de ese recurso.
+//* PUEDE RETIRAR RESERVA: la reserva sigue pendiente, el recurso no está en uso,
+// y es la más antigua (fecha_peticion) de la cola de ese recurso.
 function puedeRetirarReserva(idReserva, callback) {
-    var reserva = reservas.find(r => r.id === idReserva);
-    if (!reserva || reserva.fecha_inicio) {
-        return callback(false);
-    }
+    bd.query("SELECT * FROM reservas WHERE id = ?", [idReserva])
+      .then(([filas]) => {
+          var reserva = filas[0];
+          if (!reserva || reserva.fecha_inicio) return callback(false);
 
-    var enUso = reservas.find(r =>
-        r.recurso === reserva.recurso && r.fecha_inicio && !r.fecha_fin
-    );
-    if (enUso) {
-        return callback(false);
-    }
+          return bd.query(
+              "SELECT id FROM reservas WHERE recurso = ? AND fecha_inicio IS NOT NULL AND fecha_fin IS NULL",
+              [reserva.recurso]
+          ).then(([enUso]) => {
+              if (enUso.length > 0) return callback(false);
 
-    var pendientesDelRecurso = reservas
-        .filter(r => r.recurso === reserva.recurso && !r.fecha_inicio)
-        .sort((a, b) => new Date(a.fecha_peticion) - new Date(b.fecha_peticion));
-
-    callback(pendientesDelRecurso.length > 0 && pendientesDelRecurso[0].id === idReserva);
+              return bd.query(
+                  "SELECT id FROM reservas WHERE recurso = ? AND fecha_inicio IS NULL ORDER BY fecha_peticion ASC LIMIT 1",
+                  [reserva.recurso]
+              ).then(([primeros]) => {
+                  callback(primeros.length > 0 && primeros[0].id === reserva.id);
+              });
+          });
+      })
+      .catch(() => callback(false));
 }
 
-//* OBTENER RESERVAS devuelve todas las reservas de un sanitario
-// Se separan en pendientes (fecha_inicio==null) y realizadas (fecha_inicio!=null)
+//* OBTENER RESERVAS de un sanitario (el cliente las separa en pendientes/realizadas)
 function obtenerReservas(idSanitario, callback) {
-    var reservasSanitario = reservas.filter(r => r.sanitario === idSanitario); // .filter() devuelve un array con todas las reservas que cumplan la condición, o un array vacío si no hay ninguna
-    callback(reservasSanitario); // Devuelve un array, aunque no tenga reservas (array vacío)
+    bd.query("SELECT * FROM reservas WHERE sanitario = ?", [idSanitario])
+      .then(([filas]) => callback(filas))
+      .catch(() => callback([]));
 }
 
-//* OBTENER RESEÑAS devuelve todas las reseñas de un recurso
+//* OBTENER RESEÑAS de un recurso
 function obtenerResenyas(idRecurso, callback) {
-    var resenyasRecurso = resenyas.filter(r => r.recurso === idRecurso); // .filter() devuelve un array con todas las reseñas que cumplan la condición, o un array vacío si no hay ninguna
-    callback(resenyasRecurso); // Devuelve un array, aunque no tenga reseñas (array vacío)
+    bd.query("SELECT * FROM resenyas WHERE recurso = ?", [idRecurso])
+      .then(([filas]) => callback(filas))
+      .catch(() => callback([]));
 }
 
-
-//* CREAR RESEÑA registra una nueva reseña de un sanitario sobre un recurso
+//* CREAR RESEÑA (la fecha la pone la BD con NOW(); el id con AUTO_INCREMENT)
 function crearResenya(idRecurso, idSanitario, valoracion, descripcion, callback) {
-    var nuevoId = (resenyas.length + 1).toString(); // Nuevo ID + Pasarlo a String por que todos los id los tengo como string, aunque sean números
-    var nueva = {
-        id: nuevoId,
-        recurso: idRecurso,
-        sanitario: idSanitario,
-        fecha: new Date(), // Fecha actual
-        valor: valoracion,
-        descripcion: descripcion
-    };
-    resenyas.push(nueva); // El método push() añade un nuevo elemento al final del array
-    callback(nuevoId);
+    bd.query(
+        "INSERT INTO resenyas (recurso, sanitario, fecha, valor, descripcion) VALUES (?, ?, NOW(), ?, ?)",
+        [idRecurso, idSanitario, valoracion, descripcion]
+    )
+    .then(([resultado]) => callback(resultado.insertId))
+    .catch(() => callback(null));
 }
 
-//* RESERVAR crea una reserva en estado "pendiente" (sin fechas de inicio/fin)
-// El sanitario ha pedido el recurso pero todavía no lo ha retirado físicamente
+//* RESERVAR: crea una reserva pendiente (sin fechas de inicio/fin)
 function reservarRecurso(idRecurso, idSanitario, horasEstimadas, callback) {
-    var recurso = recursos.find(r => r.id === idRecurso); // Compruebo que el recurso existe
-    if (!recurso) {
-        return callback(null); // No existe el recurso, no se puede reservar
-    }
- 
-    var nuevoId = (reservas.length + 1).toString();
-    var nueva = {
-        id: nuevoId,
-        recurso: idRecurso,
-        sanitario: idSanitario,
-        horas_estimadas: horasEstimadas,
-        fecha_peticion: new Date(),     // momento en que se hace la reserva
-        fecha_inicio: null,             // null = aún no retirado
-        fecha_fin: null                 // null = aún no devuelto
-    };
-    reservas.push(nueva);
-    callback(nuevoId);
+    bd.query("SELECT id FROM recursos WHERE id = ?", [idRecurso])
+      .then(([recurso]) => {
+          if (recurso.length === 0) return callback(null); // no existe el recurso
+          return bd.query(
+              "INSERT INTO reservas (recurso, sanitario, horas_estimadas, fecha_peticion, fecha_inicio, fecha_fin) VALUES (?, ?, ?, NOW(), NULL, NULL)",
+              [idRecurso, idSanitario, horasEstimadas]
+          ).then(([resultado]) => callback(resultado.insertId));
+      })
+      .catch(() => callback(null));
 }
 
-
-//* CANCELAR RESERVA elimina una reserva pendiente del array
+//* CANCELAR RESERVA: elimina una reserva
 function cancelarReserva(idReserva, callback) {
-    var indice = reservas.findIndex(r => r.id === idReserva); // Compruebo que la reserva existe
-    if (indice === -1) {
-        return callback(null); // No existe la reserva, no se puede cancelar
-    }    // .splice(posicion, cantidad)
-    reservas.splice(indice, 1); // El método splice() cambia el contenido de un array eliminando elementos existentes y/o agregando nuevos elementos
-    callback(true);
+    bd.query("DELETE FROM reservas WHERE id = ?", [idReserva])
+      .then(([resultado]) => callback(resultado.affectedRows > 0 ? true : null))
+      .catch(() => callback(null));
 }
 
-//* INICIAR RESERVA el sanitario retira el recurso físicamente
-// Validamos en servidor: no se puede iniciar si ya estaba iniciada, si el recurso lo está
-// usando otra reserva, o si hay una reserva pendiente más antigua (cola FIFO por fecha_peticion).
+//* INICIAR RESERVA: el sanitario retira el recurso. Validaciones en servidor:
+// no iniciada ya, recurso no en uso por otra reserva, y es su turno (FIFO).
 function iniciarReserva(idReserva, callback) {
-    var reserva = reservas.find(r => r.id === idReserva);
-    if (!reserva) {
-        return callback(null); // No existe
-    }
-    if (reserva.fecha_inicio) {
-        return callback(null); // Ya estaba iniciada
-    }
+    bd.query("SELECT * FROM reservas WHERE id = ?", [idReserva])
+      .then(([filas]) => {
+          var reserva = filas[0];
+          if (!reserva) return callback(null);          // no existe
+          if (reserva.fecha_inicio) return callback(null); // ya iniciada
 
-    var enUso = reservas.find(r =>
-        r.recurso === reserva.recurso && r.fecha_inicio && !r.fecha_fin && r.id !== reserva.id
-    );
-    if (enUso) {
-        return callback(null); // El recurso está en uso por otra reserva
-    }
+          return bd.query(
+              "SELECT id FROM reservas WHERE recurso = ? AND fecha_inicio IS NOT NULL AND fecha_fin IS NULL AND id <> ?",
+              [reserva.recurso, reserva.id]
+          ).then(([enUso]) => {
+              if (enUso.length > 0) return callback(null); // en uso por otra
 
-    var hayAnteriorEnCola = reservas.some(r =>
-        r.recurso === reserva.recurso &&
-        !r.fecha_inicio &&
-        r.id !== reserva.id &&
-        new Date(r.fecha_peticion) < new Date(reserva.fecha_peticion)
-    );
-    if (hayAnteriorEnCola) {
-        return callback(null); // No es su turno en la cola
-    }
-
-    reserva.fecha_inicio = new Date();
-    callback(true);
+              return bd.query(
+                  "SELECT id FROM reservas WHERE recurso = ? AND fecha_inicio IS NULL AND id <> ? AND fecha_peticion < ?",
+                  [reserva.recurso, reserva.id, reserva.fecha_peticion]
+              ).then(([anteriores]) => {
+                  if (anteriores.length > 0) return callback(null); // no es su turno
+                  return bd.query(
+                      "UPDATE reservas SET fecha_inicio = NOW() WHERE id = ?",
+                      [reserva.id]
+                  ).then(() => callback(true));
+              });
+          });
+      })
+      .catch(() => callback(null));
 }
 
-//* FINALIZAR RESERVA
-// Pone fecha_fin = ahora. La reserva pasa de "en uso" a "finalizada"
+//* FINALIZAR RESERVA: pone fecha_fin = ahora
 function finalizarReserva(idReserva, callback) {
-    var reserva = reservas.find(r => r.id === idReserva); // Compruebo que la reserva existe
-    if (!reserva) {
-        return callback(null); // No existe la reserva, no se puede finalizar 
-    }
-    reserva.fecha_fin = new Date(); // Asigno la fecha de fin
-    callback(true);
+    bd.query("UPDATE reservas SET fecha_fin = NOW() WHERE id = ?", [idReserva])
+      .then(([resultado]) => callback(resultado.affectedRows > 0 ? true : null))
+      .catch(() => callback(null));
 }
 
 var servidor = rpc.server(); // crear el servidor RPC
 var app = servidor.createApp("gestion_sanitarios"); // crear aplicación de RPC
 
 // ======================================================================
-//* Paso 2: Registrar los procedimientos
+//* Registrar los procedimientos
+//  OJO: obtenerCategorias y obtenerModelos ahora son registerAsync.
 // ======================================================================
-app.registerSync(obtenerCategorias);
-app.registerSync(obtenerModelos);
+app.registerAsync(obtenerCategorias);
+app.registerAsync(obtenerModelos);
 app.registerAsync(loginSanitario);
 app.registerAsync(crearSanitario);
 app.registerAsync(actualizarSanitario);
@@ -339,5 +279,3 @@ app.registerAsync(reservarRecurso);
 app.registerAsync(cancelarReserva);
 app.registerAsync(iniciarReserva);
 app.registerAsync(finalizarReserva);
-
-

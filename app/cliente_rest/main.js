@@ -296,7 +296,9 @@ function guardarRecurso() {
         rest.post("/api/recursos", datos, function(estado, respuesta) {
             if (estado === 201) {
                 // Notificar via WS a todos los sanitarios (Parte 3)
-                var modeloObj = modelosLocal.find(function(m) { return m.id === datos.modelo; });
+                // == (no ===): datos.modelo es el value del <select> (texto) y
+                // m.id viene de la BD como número. Comparación laxa para que cuadren.
+                var modeloObj = modelosLocal.find(function(m) { return m.id == datos.modelo; });
                 var nombreMod = modeloObj ? modeloObj.nom : datos.modelo;
                 var catObj    = modeloObj ? categoriasLocal.find(function(c) { return c.id === modeloObj.categoria; }) : null;
                 var nombreCat = catObj ? catObj.nom : datos.modelo;

@@ -286,7 +286,8 @@ function procesarNotificacion(msg) {
         //    ambos casos para avisar).
         var reservasActivas = datos.reservas.filter(function(r) {
             return r.recurso === msg.idRecurso && !r.fecha_fin;
-        });
+            });
+            
         // 2) Extraemos los ids de los sanitarios afectados.
         var idsSanitariosAfectados = reservasActivas.map(function(r) { return r.sanitario; });
 

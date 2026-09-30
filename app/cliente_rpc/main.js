@@ -233,7 +233,7 @@ function cargarTablaPendientes(pendientes) {
                             <button onclick="cancelarReserva('${reserva.id}')">Cancelar</button>
                         </div>
                     </div>`;
-                    tarjetas.innerHTML += tarjeta; // Lo mismo que con las tablas pero en vez de ir añadiendo hijos de columna y rellenar columnas, relleno tarjetas nuevas, y sus <span>©
+                    tarjetas.innerHTML += tarjeta; // Lo mismo que con las tablas pero en vez de ir añadiendo hijos de columna y rellenar columnas, relleno tarjetas nuevas, y sus <span>
                 });
             });
         });
@@ -626,5 +626,21 @@ function añadirAvisoTabla(aviso) {
         '<td>' + aviso.texto + '</td>' +
         '</tr>';
 
-    tbody.innerHTML = fila + tbody.innerHTML; // más reciente arriba
+    tbody.innerHTML = fila + tbody.innerHTML; //que fila aparezca antes que los hijos tbody, hace que el aviso ultimo que llegue, aparezca arriba
+
+    // Mismo aviso como tarjeta (solo visible en móvil), también el más reciente arriba
+    var tarjetas = document.getElementById('tarjetas_avisos');
+    if (tarjetas.querySelector('em')) {
+        tarjetas.innerHTML = '';
+    }
+
+    var tarjeta = '<div class="tarjeta ' + claseColor + '">' +
+        '<div class="tarjeta-titulo tarjeta-aviso-cabecera">' +
+            '<span>' + aviso.origen + '</span>' +
+            '<span class="tarjeta-fecha">' + aviso.fecha + '</span>' +
+        '</div>' +
+        '<div>' + aviso.texto + '</div>' +
+        '</div>';
+
+    tarjetas.innerHTML = tarjeta + tarjetas.innerHTML;
 }

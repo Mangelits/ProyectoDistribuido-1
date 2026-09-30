@@ -7,7 +7,8 @@
 <html lang="es">
 
 <head>
-    <meta charset="utf8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Aplicación sanitarios</title>
     <style>
         body {
@@ -58,6 +59,52 @@
         .aviso-azul  { background-color: #cce0ff; }
         .aviso-verde { background-color: #ccffcc; }
         #seccion-avisos { margin-top: 30px; border-top: 2px solid #aaa; padding-top: 10px; }
+
+        /* ---------- ADAPTACIÓN A MÓVIL ---------- */
+        *, *::before, *::after { box-sizing: border-box; }
+        input, select, textarea, button { font: inherit; }
+
+        @media (max-width: 700px) {
+            body { margin: 10px; font-size: 16px; }
+            .header-app { font-size: 20px; padding: 10px; margin-bottom: 12px; }
+            h2 { font-size: 1.3em; }
+            .contenedor-filtros { padding: 10px; }
+
+            /* Formularios: etiqueta encima y campo a todo el ancho */
+            label { display: block; width: auto; margin: 10px 0 4px; }
+            input[type="text"], input[type="password"], input[type="number"],
+            select, textarea { width: 100%; padding: 10px; font-size: 16px; }
+            button { min-height: 44px; padding: 8px 14px; margin: 4px 4px 4px 0; }
+
+            /* Tablas: scroll horizontal si no caben */
+            table { display: block; overflow-x: auto; white-space: nowrap; }
+        }
+
+        /* ---------- TARJETAS (sustituyen a las tablas en móvil) ---------- */
+        .solo-movil { display: none; }
+        .tarjeta { background: white; border: 1px solid #ccc; border-radius: 8px; padding: 12px;
+                   margin: 10px 0; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); }
+        .tarjeta-titulo { font-weight: bold; font-size: 1.1em; padding-bottom: 8px;
+                          margin-bottom: 8px; border-bottom: 1px solid #ddd; }
+        .tarjeta-dato { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; }
+        .tarjeta-dato span:first-child { color: #555; }
+        .tarjeta-dato span:last-child { text-align: right; }
+        .tarjeta-acciones { display: flex; gap: 8px; margin-top: 10px; }
+        .tarjeta-acciones button { flex: 1; margin: 0; }
+        .tarjeta-vacia { text-align: center; color: #666; }
+        .tarjeta.aviso-rojo  { background-color: #ffcccc; }
+        .tarjeta.aviso-azul  { background-color: #cce0ff; }
+        .tarjeta.aviso-verde { background-color: #ccffcc; }
+        .tarjeta-aviso-cabecera { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+        .tarjeta-fecha { font-weight: normal; font-size: 0.85em; color: #555; }
+
+        /* Bloques desplegables: al pulsar el título se pone/quita esta clase */
+        .oculto { display: none; }
+
+        @media (max-width: 700px) {
+            .solo-escritorio { display: none; }
+            .solo-movil { display: block; }
+        }
     </style>
 </head>
 
@@ -96,29 +143,41 @@
             <button onclick="salir()" style="float: right;">Salir</button>
         </p>
 
-        <h3>Reservas Pendientes</h3>
-        <table id="tabla_pendientes">
-            <thead>
-                <tr>
-                    <th>Categoría</th><th>Modelo</th><th>N. Serie</th><th>Ubicación</th><th>F. Petición</th><th>H. Restantes</th><th>Acción</th>
-                </tr>
-            </thead>
-            <tbody id="lista_pendientes">
-                <!-- AQUI SE IRÁ GENERANDO LOS HIJOS DE LA TABLA-->
-            </tbody>
-        </table>
+        <h3 onclick="document.getElementById('bloque_pendientes').classList.toggle('oculto')">Reservas Pendientes</h3>
+        <div id="bloque_pendientes">
+            <table id="tabla_pendientes" class="solo-escritorio">
+                <thead>
+                    <tr>
+                        <th>Categoría</th><th>Modelo</th><th>N. Serie</th><th>Ubicación</th><th>F. Petición</th><th>H. Restantes</th><th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="lista_pendientes">
+                    <!-- AQUI SE IRÁ GENERANDO LOS HIJOS DE LA TABLA-->
+                </tbody>
+            </table>
+            <!-- Versión móvil: una tarjeta por reserva pendiente -->
+            <div id="tarjetas_pendientes" class="solo-movil">
+                <!-- AQUI SE IRÁN GENERANDO LAS TARJETAS -->
+            </div>
+        </div>
 
-        <h3 style="margin-top: 30px;">Reservas Realizadas</h3>
-        <table id="tabla_realizadas">
-            <thead>
-                <tr>
-                    <th>Categoría</th><th>Modelo</th><th>N. Serie</th><th>H. Estimadas</th><th>F. Inicio</th><th>F. Fin</th><th>Reseña</th>
-                </tr>
-            </thead>
-            <tbody id="lista_realizadas">
-                <!-- AQUI SE IRÁ GERANDO LOS HIJOS DE LA TABLA-->
-            </tbody>
-        </table>
+        <h3 style="margin-top: 30px;" onclick="document.getElementById('bloque_realizadas').classList.toggle('oculto')">Reservas Realizadas</h3>
+        <div id="bloque_realizadas">
+            <table id="tabla_realizadas" class="solo-escritorio">
+                <thead>
+                    <tr>
+                        <th>Categoría</th><th>Modelo</th><th>N. Serie</th><th>H. Estimadas</th><th>F. Inicio</th><th>F. Fin</th><th>Reseña</th>
+                    </tr>
+                </thead>
+                <tbody id="lista_realizadas">
+                    <!-- AQUI SE IRÁ GERANDO LOS HIJOS DE LA TABLA-->
+                </tbody>
+            </table>
+            <!-- Versión móvil: una tarjeta por reserva realizada -->
+            <div id="tarjetas_realizadas" class="solo-movil">
+                <!-- AQUI SE IRÁN GENERANDO LAS TARJETAS -->
+            </div>
+        </div>
 
         <div style="margin-top: 20px;">
             <button onclick="abrirNuevaReserva()">Nueva Reserva</button>
@@ -126,19 +185,25 @@
 
         <!-- AVISOS WEBSOCKET (Parte 3) -->
         <div id="seccion-avisos">
-            <h3>Avisos</h3>
-            <table id="tabla_avisos">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Origen</th>
-                        <th>Texto del aviso</th>
-                    </tr>
-                </thead>
-                <tbody id="tbody_avisos">
-                    <tr><td colspan="3"><em>Sin avisos recibidos aún</em></td></tr>
-                </tbody>
-            </table>
+            <h3 onclick="document.getElementById('bloque_avisos').classList.toggle('oculto')">Avisos</h3>
+            <div id="bloque_avisos">
+                <table id="tabla_avisos" class="solo-escritorio">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Origen</th>
+                            <th>Texto del aviso</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody_avisos">
+                        <tr><td colspan="3"><em>Sin avisos recibidos aún</em></td></tr>
+                    </tbody>
+                </table>
+                <!-- Versión móvil: una tarjeta por aviso -->
+                <div id="tarjetas_avisos" class="solo-movil">
+                    <div class="tarjeta tarjeta-vacia"><em>Sin avisos recibidos aún</em></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -151,7 +216,7 @@
             <button onclick="buscarRecursosSanitario()" style="margin-top: 10px;">Buscar Recursos</button>
         </div>
 
-        <table id="tabla_busqueda">
+        <table id="tabla_busqueda" class="solo-escritorio">
             <thead>
                 <tr>
                     <th>N. Serie</th><th>Ubicación</th><th>Disponibilidad</th><th>Valoración Media</th><th>Acción</th>
@@ -161,6 +226,10 @@
                 <!-- AQUI IRÁ GENERANDOSE LOS HIJOS DE LA TABLA-->
             </tbody>
         </table>
+        <!-- Versión móvil: una tarjeta por recurso encontrado -->
+        <div id="tarjetas_busqueda" class="solo-movil">
+            <!-- AQUI SE IRÁN GENERANDO LAS TARJETAS -->
+        </div>
         <br> <!--Hago un break para que el botón no aparezca seguido la tabla si no abajo-->
         <button onclick="cambiarSeccion('menu-principal')">Cancelar</button>
     </div>

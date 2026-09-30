@@ -178,10 +178,13 @@ function actualizarInicio() {
 // ======================================================================
 function cargarTablaPendientes(pendientes) {
     var tbody = document.getElementById("lista_pendientes");
+    var tarjetas = document.getElementById("tarjetas_pendientes"); // Tarjetas para la version de movil
     tbody.innerHTML = "";
+    tarjetas.innerHTML = "";
 
     if (pendientes.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7">No hay reservas pendientes</td></tr>';
+        tarjetas.innerHTML = '<div class="tarjeta tarjeta-vacia">No hay reservas pendientes</div>';
         return;
     }
 
@@ -217,6 +220,20 @@ function cargarTablaPendientes(pendientes) {
                         </td>
                     </tr>`;
                     tbody.innerHTML += fila;
+
+                    // Misma reserva como tarjeta y con la clase, hacemos que sea visible solo para un ancho de <= 700 px
+                    var tarjeta = `<div class="tarjeta">
+                        <div class="tarjeta-titulo">${nombreCat} · ${nombreMod}</div>
+                        <div class="tarjeta-dato"><span>N. Serie</span><span>${recurso.num_serie}</span></div>
+                        <div class="tarjeta-dato"><span>Ubicación</span><span>${recurso.ubi}</span></div>
+                        <div class="tarjeta-dato"><span>F. Petición</span><span>${formatearFecha(reserva.fecha_peticion)}</span></div>
+                        <div class="tarjeta-dato"><span>H. Restantes</span><span>${horasTexto}</span></div>
+                        <div class="tarjeta-acciones">
+                            ${botonRetirar}
+                            <button onclick="cancelarReserva('${reserva.id}')">Cancelar</button>
+                        </div>
+                    </div>`;
+                    tarjetas.innerHTML += tarjeta; // Lo mismo que con las tablas pero en vez de ir añadiendo hijos de columna y rellenar columnas, relleno tarjetas nuevas, y sus <span>©
                 });
             });
         });
@@ -228,10 +245,13 @@ function cargarTablaPendientes(pendientes) {
 // ======================================================================
 function cargarTablaRealizadas(realizadas) {
     var tbody = document.getElementById("lista_realizadas");
+    var tarjetas = document.getElementById("tarjetas_realizadas"); // Tarjetas para la version de movil
     tbody.innerHTML = "";
+    tarjetas.innerHTML = "";
 
     if (realizadas.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8">No hay reservas realizadas</td></tr>';
+        tarjetas.innerHTML = '<div class="tarjeta tarjeta-vacia">No hay reservas realizadas</div>';
         return;
     }
 
@@ -260,6 +280,25 @@ function cargarTablaRealizadas(realizadas) {
                 <td><button onclick="abrirResenya('${reserva.recurso}', '${recurso.num_serie}', '${nombreCat}', '${nombreMod}')">Reseña</button></td>
             </tr>`;
             tbody.innerHTML += fila;
+
+            // Misma reserva como tarjeta (solo visible en móvil).
+            // Si aún no tiene F. Fin se indica "En uso" y el botón Devolver pasa a las acciones
+            var botonDevolver = reserva.fecha_fin
+                ? ""
+                : `<button onclick="devolverRecurso('${reserva.id}','${reserva.recurso}','${nombreCat}','${nombreMod}','${recurso.num_serie}')">Devolver</button>`;
+
+            var tarjeta = `<div class="tarjeta">
+                <div class="tarjeta-titulo">${nombreCat} · ${nombreMod}</div>
+                <div class="tarjeta-dato"><span>N. Serie</span><span>${recurso.num_serie}</span></div>
+                <div class="tarjeta-dato"><span>H. Estimadas</span><span>${reserva.horas_estimadas}</span></div>
+                <div class="tarjeta-dato"><span>F. Inicio</span><span>${formatearFecha(reserva.fecha_inicio)}</span></div>
+                <div class="tarjeta-dato"><span>F. Fin</span><span>${reserva.fecha_fin ? formatearFecha(reserva.fecha_fin) : "En uso"}</span></div>
+                <div class="tarjeta-acciones">
+                    ${botonDevolver}
+                    <button onclick="abrirResenya('${reserva.recurso}', '${recurso.num_serie}', '${nombreCat}', '${nombreMod}')">Reseña</button>
+                </div>
+            </div>`;
+            tarjetas.innerHTML += tarjeta;
         });
     });
 }
@@ -324,7 +363,7 @@ function cancelarReserva(idReserva) {
 }
 
 // ======================================================================
-// NUEVA RESERVA
+// NUEVA RESERVA *TABLA*
 // ======================================================================
 function abrirNuevaReserva() {
     // Cargamos las categorías en el select
@@ -339,6 +378,7 @@ function abrirNuevaReserva() {
     });
 
     document.getElementById("lista_busqueda").innerHTML = "";
+    document.getElementById("tarjetas_busqueda").innerHTML = "";
     cambiarSeccion('nueva-reserva');
 }
 
@@ -362,10 +402,13 @@ function buscarRecursosSanitario() {
     var tiempoEstimado = parseInt(document.getElementById("tiempo_estimado").value);
     var tbody          = document.getElementById("lista_busqueda");
     tbody.innerHTML    = "";
+    var tarjetas       = document.getElementById("tarjetas_busqueda"); // Tarjetas para la version de movil
+    tarjetas.innerHTML = "";
 
     obtenerRecursosRPC(idModelo, function(recursos) {
         if (recursos.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5">No hay recursos disponibles para ese modelo</td></tr>'; // Si no hay recursos, mostramos un mensaje y salimos
+            tarjetas.innerHTML = '<div class="tarjeta tarjeta-vacia">No hay recursos disponibles para ese modelo</div>';
             return;
         }
 
@@ -402,6 +445,16 @@ function buscarRecursosSanitario() {
                             <td>${botonAccion}</td>
                         </tr>`;
                         tbody.innerHTML += fila;
+
+                        // Mismo recurso como tarjeta solo visible en móvil
+                        var tarjeta = `<div class="tarjeta">
+                            <div class="tarjeta-titulo">${recurso.num_serie}</div>
+                            <div class="tarjeta-dato"><span>Ubicación</span><span>${recurso.ubi}</span></div>
+                            <div class="tarjeta-dato"><span>Disponibilidad</span><span>${disponibilidad}</span></div>
+                            <div class="tarjeta-dato"><span>Valoración Media</span><span>${valoracionMedia}</span></div>
+                            <div class="tarjeta-acciones">${botonAccion}</div>
+                        </div>`;
+                        tarjetas.innerHTML += tarjeta;
                     });
                 });
             });

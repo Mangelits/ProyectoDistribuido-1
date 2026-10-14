@@ -17,7 +17,13 @@
 // ======================================================================
 // CONEXIÓN CON EL SERVIDOR RPC
 // ======================================================================
-var appRPC = rpc("localhost", "gestion_sanitarios");
+// [NFC] (Cordova) IP del portátil donde corre el servidor (node app/servidor.js).
+// En la app del móvil "localhost" es el propio móvil, así que hay que poner la
+// IP del portátil en la red que compartan (p. ej. el punto de acceso del móvil).
+// Se mira en el Mac con: ipconfig getifaddr en0
+var SERVIDOR = "10.230.45.155";
+
+var appRPC = rpc(SERVIDOR, "gestion_sanitarios"); // [NFC] antes: rpc("localhost", ...)
 
 var loginRPC           = appRPC.procedure("loginSanitario");
 var crearSanitarioRPC  = appRPC.procedure("crearSanitario");
@@ -584,7 +590,7 @@ function formatearFecha(fechaString) {
 function abrirWsSanitario() {
     if (wsSanitario) { wsSanitario.close(); }
 
-    wsSanitario = new WebSocket('ws://localhost:3502');
+    wsSanitario = new WebSocket('ws://' + SERVIDOR + ':3502'); // [NFC] antes: 'ws://localhost:3502'
 
     wsSanitario.onopen = function() {
         // Registro como sanitario
@@ -644,3 +650,164 @@ function añadirAvisoTabla(aviso) {
 
     tarjetas.innerHTML = tarjeta + tarjetas.innerHTML;
 }
+
+// ======================================================================
+// [NFC] NFC (Práctica 2) — TODO ESTE BLOQUE ES NUEVO HASTA EL FINAL DEL ARCHIVO
+// ======================================================================
+//? En la etiqueta se escribe el ID del recurso (1, 3, 11...) como registro
+//? de texto NDEF. Al leer una etiqueta se mira qué reserva tiene el
+//? sanitario sobre ese recurso:
+//?   i.   Reserva retirada sin devolver -> se devuelve  (como "Devolver")
+//?   ii.  Reserva pendiente de retirar  -> se retira   (como "Retirar")
+//?   iii. Ninguna reserva               -> se crea una reserva y se retira
+//
+//* Para escribir: se pulsa "Escribir NFC" y la SIGUIENTE etiqueta que se
+//* acerque se escribe en vez de leerse (así no se dispara una devolución o
+//* retirada sin querer al acercar la etiqueta para escribirla).
+// ======================================================================
+// [NFC] Estado: modo lectura o escritura pendiente
+var textoNfcPorEscribir = null; // null = modo lectura; texto = pendiente de escribir
+var HORAS_NFC = 1;              // Horas estimadas de las reservas creadas por NFC (caso iii)
+
+// [NFC] Cordova avisa con 'deviceready' cuando los plugins (nfc) están listos
+document.addEventListener('deviceready', onDeviceReady, false);
+
+function onDeviceReady() { // Espero a que cordova esté inicializado
+    // Escuchar cualquier etiqueta NDEF cercana
+    nfc.addNdefListener(
+        alDetectarEtiqueta,
+        function () {
+            console.log("Escuchador NFC activado con éxito.");
+        },
+        function (error) {
+            console.log("Error al iniciar el escuchador NFC: " + error);
+        }
+    );
+
+    // Etiquetas nuevas sin formato NDEF: no se pueden leer, solo escribir
+    nfc.addTagDiscoveredListener(
+        function () {
+            if (textoNfcPorEscribir !== null) escribirEtiquetaPendiente();
+        },
+        function () {},
+        function (error) {
+            console.log("Error al iniciar el escuchador de etiquetas: " + error);
+        }
+    );
+}
+
+// [NFC] Lectura: se ejecuta al acercar una etiqueta NDEF
+function alDetectarEtiqueta(nfcEvent) {
+    if (textoNfcPorEscribir !== null) {
+        escribirEtiquetaPendiente();
+        return;
+    }
+
+    var tag = nfcEvent.tag;
+    console.log("Etiqueta detectada:", JSON.stringify(tag));
+
+    if (!tag.ndefMessage || tag.ndefMessage.length === 0) {
+        alert("La etiqueta está vacía. Escribe primero un código de recurso.");
+        return;
+    }
+
+    // Decodificar el mensaje NDEF
+    var payload = tag.ndefMessage[0].payload;
+    // Los primeros bytes son el idioma
+    var languageCodeLength = payload[0] & 0x3F;
+    // Quitar el idioma
+    var codigo = nfc.bytesToString(payload.slice(1 + languageCodeLength)).trim();
+
+    procesarCodigoRecurso(codigo);
+}
+
+// [NFC] Escritura (punto 3.a): botón "Escribir NFC", deja el texto preparado hasta que se acerque una etiqueta
+function escribirNFC(texto) {
+    if (!texto) {
+        alert("Introduce un código de recurso");
+        return;
+    }
+    if (typeof nfc === "undefined") {
+        alert("NFC no disponible (solo funciona en la app del móvil)");
+        return;
+    }
+    textoNfcPorEscribir = String(texto);
+    alert("Acerca la etiqueta NFC para escribir el código " + texto);
+}
+
+// [NFC] Escribe en la etiqueta el código que dejó preparado escribirNFC()
+function escribirEtiquetaPendiente() {
+    var texto = textoNfcPorEscribir;
+    textoNfcPorEscribir = null; // volvemos a modo lectura pase lo que pase
+
+    // Crear un registro de texto NDEF
+    console.log("Escribiendo en NFC: " + texto);
+    var record = ndef.textRecord(texto);
+    nfc.write(
+        [record],
+        function () {
+            document.getElementById("nfc_codigo").value = "";
+            alert("¡Escritura en NFC exitosa! Código: " + texto);
+        },
+        function (error) {
+            console.log("Error al escribir en NFC", error);
+            alert("Error al escribir: " + JSON.stringify(error));
+        }
+    );
+}
+
+// [NFC] Lectura (punto 3.b): decide qué hacer con el recurso leído (casos i, ii, iii)
+function procesarCodigoRecurso(codigo) {
+    if (!idSanitarioLogueado) {
+        alert("Inicia sesión para usar las etiquetas NFC");
+        return;
+    }
+
+    obtenerRecursoRPC(codigo, function(recurso) {
+        if (!recurso) {
+            alert("No existe ningún recurso con código " + codigo);
+            return;
+        }
+
+        // Resolvemos nombres desde la caché local (necesarios para los avisos WS)
+        var modeloObj = modelosLocal.find(m => m.id === recurso.modelo);
+        var nombreMod = modeloObj ? modeloObj.nom : '';
+        var catObj    = modeloObj ? categoriasLocal.find(c => c.id === modeloObj.categoria) : null;
+        var nombreCat = catObj ? catObj.nom : '';
+
+        obtenerReservasRPC(idSanitarioLogueado, function(reservas) {
+            // == (no ===): el código leído es texto ("3") y reserva.recurso es número (3)
+            var delRecurso = reservas.filter(r => r.recurso == codigo);
+            var enUso      = delRecurso.find(r => r.fecha_inicio !== null && r.fecha_fin === null);
+            var pendiente  = delRecurso.find(r => r.fecha_inicio === null);
+
+            if (enUso) {
+                // i. Reserva sin devolver -> devolver
+                alert("NFC: devolviendo " + nombreCat + " " + nombreMod + " (" + recurso.num_serie + ")");
+                devolverRecurso(enUso.id, codigo, nombreCat, nombreMod, recurso.num_serie);
+
+            } else if (pendiente) {
+                // ii. Reserva pendiente de retirar -> retirar (si es mi turno)
+                puedeRetirarReservaRPC(pendiente.id, function(puedeRetirar) {
+                    if (puedeRetirar) {
+                        alert("NFC: retirando " + nombreCat + " " + nombreMod + " (" + recurso.num_serie + ")");
+                        retirarRecurso(pendiente.id, codigo, nombreCat, nombreMod, recurso.num_serie);
+                    } else {
+                        alert("Tienes una reserva de este recurso, pero aún no es tu turno para retirarlo");
+                    }
+                });
+
+            } else {
+                // iii. Sin reserva -> crear reserva y retirar (solo si está libre y sin cola)
+                recursoDisponibleRPC(codigo, function(disponible) {
+                    if (disponible) {
+                        retirarDirecto(codigo, HORAS_NFC);
+                    } else {
+                        alert("El recurso " + recurso.num_serie + " no está disponible ahora mismo. Puedes reservarlo desde Nueva Reserva.");
+                    }
+                });
+            }
+        });
+    });
+}
+// [NFC] Fin del bloque NFC

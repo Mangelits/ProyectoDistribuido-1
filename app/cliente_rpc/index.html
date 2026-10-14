@@ -143,6 +143,13 @@
             <button onclick="salir()" style="float: right;">Salir</button>
         </p>
 
+        <!-- [NFC] Formulario para escribir el id de un recurso en una etiqueta-->
+        <div class="contenedor-filtros">
+            <div><label>Código de recurso:</label><input type="number" id="nfc_codigo" min="1"></div>
+            <button onclick="escribirNFC(document.getElementById('nfc_codigo').value)">Escribir NFC</button>
+        </div>
+        <!-- [NFC] Fin formulario NFC -->
+
         <h3 onclick="document.getElementById('bloque_pendientes').classList.toggle('oculto')">Reservas Pendientes</h3>
         <div id="bloque_pendientes">
             <table id="tabla_pendientes" class="solo-escritorio">
@@ -247,7 +254,8 @@
         </div>
     </div>
     <!--* SCRIPTS-->
-    <script src="rest.js"></script> 
+    <script src="cordova.js"></script> <!-- [NFC] Siempre el primero: lo genera Cordova al compilar y carga el plugin NFC (objetos nfc y ndef) -->
+    <script src="rest.js"></script>
     <script src="rpc.js"></script> 
     <script src="main.js"></script>
     <!--! LOGICA PARA EL CAMBIO DE SECCION (DIV)-->

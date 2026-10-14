@@ -116,6 +116,80 @@ function cargarDatosGestorEInicio() {
     });
 }
 
+// ==========================================
+//! ------ PRÁCTICA 3 · PARTE 1: MINISTERIO --
+// ==========================================
+// Pide al servidor que recopile todas las reservas y las envíe al
+// Ministerio de Sanidad. El envío real (y el id_area = 12) se hace en el
+// servidor; aquí solo lanzamos la orden y mostramos el resultado.
+function enviarDatosMinisterio() {
+    rest.post("/api/ministerio/enviar", {}, function (estado, respuesta) {
+        if (estado === 200) {
+            alert("Datos enviados al Ministerio correctamente (" + respuesta.enviadas + " reservas).");
+        } else {
+            var detalle = (respuesta && respuesta.mensaje) ? respuesta.mensaje : respuesta;
+            alert("No se pudieron enviar los datos al Ministerio.\n" + detalle);
+        }
+    });
+}
+
+//? FUNCION VERIFICAR JSON MINISTERIO
+
+function verificarJSONMinisterio(jsonString) {
+    // .parse lo que have es convertir el string JSON en un objeto de JavaScript. Si el string no es un JSON válido, lanzará un error.
+    const data = JSON.parse(jsonString);
+    
+    // Expresión regular estricta para el formato YYYY-MM-DD
+    const regexFecha = /^\d{4}-\d{2}-\d{2}$/; 
+    
+    // 2. Filtrar el array dejando solo los elementos válidos
+    const datosValidos = data.datos.filter(item => {
+        
+        // Regla A: Ningún valor puede ser null o undefined (el operador 'in' asegura que la clave exista)
+        const clavesRequeridas = ['nombre', 'apellidos', 'categoria', 'horas_estimadas', 'fec_pet', 'fec_ini', 'fecha_fin'];
+        for (let clave of clavesRequeridas) {
+            if (item[clave] == null) return false; 
+        }
+
+        // Regla B: Cadenas de texto (varchar)
+        const sonStrings = typeof item.nombre === 'string' &&
+                           typeof item.apellidos === 'string' &&
+                           typeof item.categoria === 'string';
+                           
+        // Regla C: Entero (int)
+        const esEntero = Number.isInteger(item.horas_estimadas);
+        
+        // Regla D: Fechas con formato YYYY-MM-DD
+        const fechasValidas = typeof item.fec_pet === 'string' && regexFecha.test(item.fec_pet) &&
+                              typeof item.fec_ini === 'string' && regexFecha.test(item.fec_ini) &&
+                              typeof item.fecha_fin === 'string' && regexFecha.test(item.fecha_fin);
+
+        // Retorna true solo si pasa todas las verificaciones
+        return sonStrings && esEntero && fechasValidas;
+    });
+
+    // 3. Empaquetar y retornar el nuevo JSON con formato (indentado a 4 espacios)
+    return JSON.stringify({ "datos": datosValidos }, null, 4);
+}
+
+// =========================================
+//! FUNCION GET MINISTERIO
+// =========================================
+
+function obtenerRankingReseñas() {
+    rest.get("https://undefined.ua.es/telemedicina/api/datos", function (estado, respuesta) {
+        if (estado === 200) {
+            alert("Datos obtenidos del Ministerio correctamente:\n" + JSON.stringify(respuesta, null, 2));
+            console.log("Datos obtenidos del Ministerio:", respuesta);
+        }
+    });
+
+    ranking = [];
+
+};
+
+
+
 function editarDatosGestor() {
     // Si entra aquí es porque ya hay un gestor logueado
     rest.get("/api/gestores/" + idGestorLogueado, function(estado, respuesta) {

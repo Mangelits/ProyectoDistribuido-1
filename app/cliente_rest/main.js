@@ -116,77 +116,150 @@ function cargarDatosGestorEInicio() {
     });
 }
 
-// ==========================================
-//! ------ PRÁCTICA 3 · PARTE 1: MINISTERIO --
-// ==========================================
-// Pide al servidor que recopile todas las reservas y las envíe al
-// Ministerio de Sanidad. El envío real (y el id_area = 12) se hace en el
-// servidor; aquí solo lanzamos la orden y mostramos el resultado.
-function enviarDatosMinisterio() {
-    rest.post("/api/ministerio/enviar", {}, function (estado, respuesta) {
-        if (estado === 200) {
-            alert("Datos enviados al Ministerio correctamente (" + respuesta.enviadas + " reservas).");
-        } else {
-            var detalle = (respuesta && respuesta.mensaje) ? respuesta.mensaje : respuesta;
-            alert("No se pudieron enviar los datos al Ministerio.\n" + detalle);
-        }
-    });
-}
 
-//? FUNCION VERIFICAR JSON MINISTERIO
 
-function verificarJSONMinisterio(jsonString) {
-    // .parse lo que have es convertir el string JSON en un objeto de JavaScript. Si el string no es un JSON válido, lanzará un error.
-    const data = JSON.parse(jsonString);
-    
-    // Expresión regular estricta para el formato YYYY-MM-DD
-    const regexFecha = /^\d{4}-\d{2}-\d{2}$/; 
-    
-    // 2. Filtrar el array dejando solo los elementos válidos
-    const datosValidos = data.datos.filter(item => {
-        
-        // Regla A: Ningún valor puede ser null o undefined (el operador 'in' asegura que la clave exista)
-        const clavesRequeridas = ['nombre', 'apellidos', 'categoria', 'horas_estimadas', 'fec_pet', 'fec_ini', 'fecha_fin'];
-        for (let clave of clavesRequeridas) {
-            if (item[clave] == null) return false; 
-        }
-
-        // Regla B: Cadenas de texto (varchar)
-        const sonStrings = typeof item.nombre === 'string' &&
-                           typeof item.apellidos === 'string' &&
-                           typeof item.categoria === 'string';
-                           
-        // Regla C: Entero (int)
-        const esEntero = Number.isInteger(item.horas_estimadas);
-        
-        // Regla D: Fechas con formato YYYY-MM-DD
-        const fechasValidas = typeof item.fec_pet === 'string' && regexFecha.test(item.fec_pet) &&
-                              typeof item.fec_ini === 'string' && regexFecha.test(item.fec_ini) &&
-                              typeof item.fecha_fin === 'string' && regexFecha.test(item.fecha_fin);
-
-        // Retorna true solo si pasa todas las verificaciones
-        return sonStrings && esEntero && fechasValidas;
-    });
-
-    // 3. Empaquetar y retornar el nuevo JSON con formato (indentado a 4 espacios)
-    return JSON.stringify({ "datos": datosValidos }, null, 4);
-}
 
 // =========================================
-//! FUNCION GET MINISTERIO
+//! FUNCION GET MINISTERIO | PRACTICA 3
 // =========================================
+
+// Nombres de las áreas médicas según los códigos del enunciado (id_area -> nombre)
+var nombresAreas = {
+    1: "Alergología",
+    2: "Anestesiología",
+    3: "Cardiología",
+    4: "Cirugía General",
+    5: "Dermatología",
+    6: "Aparato Digestivo",
+    7: "Endocrinología",
+    8: "Ginecología",
+    9: "Hematología",
+    10: "Medicina Interna",
+    11: "Neumología",
+    12: "Neurología",
+    13: "Oftalmología",
+    14: "Oncología",
+    15: "Pediatría",
+    16: "Psiquiatría",
+    17: "Traumatología",
+    18: "Urología"
+};
+
+// Verifica un envío del Ministerio antes de contarlo en el ranking.
+// Recibe el array "datos" de un envío (datosRank) y su id_area.
+// Devuelve true solo si el área es válida (1-18) y TODOS los objetos del
+// array tienen los campos con el tipo correcto.
+
+function verificar(datosRank, id_area) {
+    if (id_area < 1 || id_area > 18) {
+        return false;
+    }
+    // datosRank tiene que ser un array (si no, no se puede recorrer)
+    if (!Array.isArray(datosRank)) {
+        return false;
+    }
+    // Formatos string y number
+    for (var i = 0; i < datosRank.length; i++) {
+        var valor = datosRank[i];
+        // El objeto tiene que existir: con null o undefined, leer valor.nombre daría error.
+        if (!valor) {
+            return false;
+        }
+        // Todos los campos tienen que existir en el objeto (aunque fec_ini y fecha_fin valgan null).
+        // "campo in valor" es true si el objeto tiene esa clave, tenga el valor que tenga.
+        if (!('nombre' in valor) || !('apellidos' in valor) || !('categoría' in valor) ||
+            !('horas_estimadas' in valor) || !('fec_pet' in valor) ||
+            !('fec_ini' in valor) || !('fecha_fin' in valor)) {
+            return false;
+        }
+        if (typeof valor.nombre !== 'string' || typeof valor.apellidos !== 'string' || typeof valor.categoría !== 'string' || typeof valor.horas_estimadas !== 'number') {
+            return false;
+        }
+        // fec_pet es obligatoria: siempre hay fecha de petición.
+        if (!esFechaValida(valor.fec_pet)) {
+            return false;
+        }
+        // fec_ini y fecha_fin pueden ser null (reserva sin empezar o sin terminar).
+        if ((valor.fec_ini !== null && !esFechaValida(valor.fec_ini)) ||
+            (valor.fecha_fin !== null && !esFechaValida(valor.fecha_fin))) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// Devuelve true si "fecha" es un texto en formato ISO 8601: YYYY-MM-DDTHH:MM:SS.sssZ
+// (ejemplo: 2026-10-15T11:38:28.000Z).
+// La expresión regular: inicio (^), 4 dígitos-2 dígitos-2 dígitos, la letra T,
+// 2 dígitos:2 dígitos:2 dígitos, un punto (\.) con 3 dígitos de milisegundos,
+// la letra Z (hora UTC) y fin ($).
+// Un null o un número no pasan (no son texto).
+function esFechaValida(fecha) {
+    return typeof fecha === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(fecha);
+}
 
 function obtenerRankingReseñas() {
     rest.get("https://undefined.ua.es/telemedicina/api/datos", function (estado, respuesta) {
         if (estado === 200) {
-            alert("Datos obtenidos del Ministerio correctamente:\n" + JSON.stringify(respuesta, null, 2));
             console.log("Datos obtenidos del Ministerio:", respuesta);
+
+            // Contar, por cada id_area, cuántos objetos de "datos" pasan la verificación.
+            // contadores queda así: { 12: 25, 3: 14, ... }
+            // Si hay varios envíos de la misma área, se suman en el mismo contador.
+            var contadores = {};
+
+            respuesta.forEach(function (envio) {
+                var idArea = envio.id_area;
+                if ( 1 <= idArea && idArea <= 18 ) {
+                    if (contadores[idArea] === undefined) contadores[idArea] = 0; // Inicializar contador si no existe aún
+                }
+                // Si datos no es un array no se puede recorrer: saltamos este envío.
+                if (!Array.isArray(envio.datos)) {
+                    return; // en un forEach, return pasa al siguiente envío
+                }
+                // Se verifica objeto a objeto: cada objeto válido suma 1 a su área.
+                // A verificar se le pasa un array de un solo objeto ([objeto]).
+                envio.datos.forEach(function (objeto) {
+                    if (verificar([objeto], idArea)) {
+                        contadores[idArea]++;
+                    }
+                });
+            });
+
+            // Pasar a un array [{ id_area, total }] y ordenarlo de mayor a menor (ranking).
+            var ranking = [];
+            for (var idArea in contadores) {
+                ranking.push({ id_area: Number(idArea), total: contadores[idArea] });
+            }
+            ranking.sort(function (a, b) { return b.total - a.total; });
+
+            
+            var tbody = document.getElementById("tbody_ranking");
+            tbody.innerHTML = ""; // limpiar el ranking anterior
+
+            ranking.forEach(function (area, posicion) {
+                var fila = document.createElement("tr");
+
+                var celdaPos = document.createElement("td");
+                celdaPos.textContent = posicion + 1;
+
+                var celdaArea = document.createElement("td");
+                celdaArea.textContent = nombresAreas[area.id_area] || ("Área " + area.id_area);
+
+                var celdaTotal = document.createElement("td");
+                celdaTotal.textContent = area.total;
+
+                fila.appendChild(celdaPos);
+                fila.appendChild(celdaArea);
+                fila.appendChild(celdaTotal);
+                tbody.appendChild(fila);
+            });
+        } else {
+            alert("No se pudieron obtener los datos del Ministerio");
         }
     });
-
-    ranking = [];
-
-};
+}
 
 
 

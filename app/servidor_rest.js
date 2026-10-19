@@ -79,106 +79,13 @@ function fechaHoyYMD() {
 }
 
 // Convierte una fecha que viene de la BD (objeto Date de mysql2, o null) a
-// texto "YYYY-MM-DD HH:MM:SS". Si es null (reserva sin inicio/fin) devuelve
-// null tal cual, para no inventar fechas.
+// texto ISO 8601 "YYYY-MM-DDTHH:MM:SS.sssZ" (en UTC), que es el formato que
+// exige verificar(). Si es null (reserva sin inicio/fin) devuelve null tal
+// cual, para no inventar fechas.
 function fechaBDaTexto(valor) {
     if (!valor) return null;
-    var d = new Date(valor);
-    var mes = String(d.getMonth() + 1).padStart(2, "0");
-    var dia = String(d.getDate()).padStart(2, "0");
-    var hh = String(d.getHours()).padStart(2, "0");
-    var mm = String(d.getMinutes()).padStart(2, "0");
-    var ss = String(d.getSeconds()).padStart(2, "0");
-    return d.getFullYear() + "-" + mes + "-" + dia + " " + hh + ":" + mm + ":" + ss;
+    return new Date(valor).toISOString();
 }
-
-
-// ======================================================================
-//! PRIMER SERVICIO REST PRACTICA 3 | POST AL SERVIDOR CON LAS RESEÑAS 
-// ======================================================================
-// POST /api/ministerio/enviar - Envía TODAS las reservas al Ministerio.
-//
-/**
- ** Introduce los datos recopilados por un área de salud (id_area) en la base de datos. 
- ** En el BODY se pasará el siguiente objeto:
-
-*?    {“id_area” : identificador del área médica, 
-*?    “fecha” : “fecha de la subida de los datos en formato YYYY-MM-DD”, 
-*?    “datos” : [{“nombre” : “Nombre del sanitario”, “apellidos”: ”Apellidos del sanitario”, 
-*?                “categoría”: “Categoría a la que pertenece el recurso”, “horas_estimadas”: 
-*?                “Horas estiamadas de uso del recurso”, “fec_pet”: ”Fecha de petición”, 
-*?                “fec_ini”: “fecha de inicio”, “fecha_fin”: “fecha de fin”}
-*?                ]}
- */
-app.post("/api/ministerio/enviar", async function (req, res) {
-    try {
-        var [filas] = await bd.query(
-            "SELECT s.nom AS nombre, s.ape AS apellidos, c.nom AS categoria, r.horas_estimadas, r.fecha_peticion, r.fecha_inicio, r.fecha_fin " +
-            "FROM reservas r " +
-            "JOIN sanitarios s ON r.sanitario = s.id " +
-            "JOIN recursos rec ON r.recurso   = rec.id " +
-            "JOIN modelos   m  ON rec.modelo   = m.id " +
-            "JOIN categorias c ON m.categoria  = c.id " +
-            "ORDER BY r.id"
-        );
-
-    var datos = [];
-    // Por cada fila de la BD, creamos un objeto con los campos que pide el Ministerio en dicho orden
-    // nombre -> apellidos -> categoría -> horas_estimadas -> fec_pet -> fec_ini -> fecha_fin
-    filas.forEach(function (f) {
-        datos.push({
-            nombre: f.nombre,
-            apellidos: f.apellidos,
-            "categoría": f.categoria, // Lo pongo con tilde pq así lo especifíca en el body de la petición
-            horas_estimadas: f.horas_estimadas,
-            fec_pet: fechaBDaTexto(f.fecha_peticion),
-            fec_ini: fechaBDaTexto(f.fecha_inicio),
-            fecha_fin: fechaBDaTexto(f.fecha_fin)
-        });
-    });
-
-        // Body de la petición REST/POST
-        var envio = {
-            id_area: ID_AREA,
-            fecha: fechaHoyYMD(),
-            datos: datos
-        };
-
-        var respuestaMin;
-        try {
-            respuestaMin = await fetch(MINISTERIO_URL, {
-                method: "POST",
-                body: JSON.stringify(envio)
-            });
-        } catch (errRed) {
-            // No se pudo contactar con el Ministerio (host inexistente, sin
-            // red, etc.). Respondemos 502 (error de pasarela) con un mensaje
-            // claro en vez de reventar el servidor.
-            console.error("No se pudo contactar con el Ministerio:", errRed.message);
-            return res.status(502).json("No se pudo contactar con el Ministerio (" + errRed.message + ")");
-        }
-
-        // Leemos lo que conteste el Ministerio (puede ser JSON o texto).
-        var cuerpo = await respuestaMin.text();
-
-        if (respuestaMin.ok) {
-            res.status(200).json({
-                mensaje: "Datos enviados al Ministerio",
-                enviadas: datos.length,
-                respuestaMinisterio: cuerpo
-            });
-        } else {
-            res.status(respuestaMin.status).json({
-                mensaje: "El Ministerio rechazó el envío",
-                respuestaMinisterio: cuerpo
-            });
-        }
-    } catch (err) {
-        console.error(err);
-        res.status(500).json("Error en la base de datos");
-    }
-});
-
 
 // ======================================================================
 //! ---------------------------- SERVICIOS  -----------------------------

@@ -262,6 +262,138 @@ function obtenerRankingReseñas() {
 }
 
 
+//* -----------------------------------------
+//!  SERVICIO POST ENVIAR MINISTERIO (P3)
+//* -----------------------------------------
+
+var ID_AREA = 12; // Neurología: toda la app es de esta área
+
+// Fecha de hoy en formato YYYY-MM-DD (fecha de la subida de los datos)
+function fechaHoyYMD() {
+    var d = new Date();
+    var mes = String(d.getMonth() + 1).padStart(2, "0"); // getMonth() va de 0 a 11
+    var dia = String(d.getDate()).padStart(2, "0");
+    return d.getFullYear() + "-" + mes + "-" + dia;
+}
+
+// Devuelve el nombre de la categoría de un recurso: recurso -> modelo -> categoría
+function nombreCategoriaRecurso(recurso) {
+    var modelo = modelosLocal.find(m => m.id === recurso.modelo);
+    if (!modelo) return "Desconocida";
+    var categoria = categoriasLocal.find(c => c.id === modelo.categoria);
+    return categoria ? categoria.nom : "Desconocida";
+}
+
+// Recoge TODAS las reservas usando los GET de nuestro servidor y las envía al Ministerio.
+// Como cada GET es asíncrono, se usa un contador de peticiones pendientes:
+// cuando llega a 0 es que ya han llegado todas las respuestas y se pasa al paso siguiente.
+function enviarDatosMinisterio() {
+    // 1) Todos los recursos (sin filtros)
+    rest.get("/api/recursos", function (estado, recursos) {
+        if (estado !== 200) {
+            alert("No se pudieron obtener los recursos");
+            return;
+        }
+        if (recursos.length === 0) {
+            alert("No hay recursos, no hay reservas que enviar");
+            return;
+        }
+
+        // 2) Las reservas de cada recurso
+        var reservasConRecurso = []; // cada elemento: { reserva, recurso }
+        var pendientes = recursos.length;
+        var hayError = false;
+
+        recursos.forEach(function (recurso) {
+            rest.get("/api/recursos/" + recurso.id + "/reservas", function (estado, reservas) {
+                if (estado === 200) {
+                    reservas.forEach(function (reserva) {
+                        reservasConRecurso.push({ reserva: reserva, recurso: recurso });
+                    });
+                } else {
+                    hayError = true;
+                }
+                pendientes--;
+                if (pendientes === 0) {
+                    if (hayError) {
+                        alert("No se pudieron obtener todas las reservas");
+                        return;
+                    }
+                    obtenerSanitariosYEnviar(reservasConRecurso);
+                }
+            });
+        });
+    });
+}
+
+// 3) Pide los datos de cada sanitario (una sola vez por sanitario) y monta el envío
+function obtenerSanitariosYEnviar(reservasConRecurso) {
+    if (reservasConRecurso.length === 0) {
+        alert("No hay reservas que enviar");
+        return;
+    }
+
+    // Ids de sanitarios sin repetir
+    var idsSanitarios = [];
+    reservasConRecurso.forEach(function (rr) {
+        if (!idsSanitarios.includes(rr.reserva.sanitario)) idsSanitarios.push(rr.reserva.sanitario);
+    });
+
+    var sanitarios = {}; // id -> { nom, ape }
+    var pendientes = idsSanitarios.length;
+    var hayError = false;
+
+    idsSanitarios.forEach(function (idSanitario) {
+        rest.get("/api/sanitarios/" + idSanitario, function (estado, sanitario) {
+            if (estado === 200) {
+                sanitarios[idSanitario] = sanitario;
+            } else {
+                hayError = true;
+            }
+            pendientes--;
+            if (pendientes === 0) {
+                if (hayError) {
+                    alert("No se pudieron obtener todos los sanitarios");
+                    return;
+                }
+                montarYEnviar(reservasConRecurso, sanitarios);
+            }
+        });
+    });
+}
+
+// 4) Monta el body con el formato del Ministerio y 5) hace el POST
+function montarYEnviar(reservasConRecurso, sanitarios) {
+    var datos = reservasConRecurso.map(function (rr) {
+        var sanitario = sanitarios[rr.reserva.sanitario];
+        return {
+            nombre: sanitario.nom,
+            apellidos: sanitario.ape,
+            "categoría": nombreCategoriaRecurso(rr.recurso),
+            horas_estimadas: rr.reserva.horas_estimadas,
+            // Las fechas ya llegan del servidor en ISO (2026-10-15T11:38:28.000Z) o null
+            fec_pet: rr.reserva.fecha_peticion,
+            fec_ini: rr.reserva.fecha_inicio,
+            fecha_fin: rr.reserva.fecha_fin
+        };
+    });
+
+    var envio = {
+        id_area: ID_AREA,
+        fecha: fechaHoyYMD(),
+        datos: datos
+    };
+    console.log("Envío al Ministerio:", envio);
+
+    rest.post("https://undefined.ua.es/telemedicina/api/datos", envio, function (estado, respuesta) {
+        if (estado >= 200 && estado < 300) {
+            alert("Datos enviados al Ministerio correctamente (" + datos.length + " reservas).");
+        } else {
+            alert("El Ministerio no aceptó el envío (código " + estado + ").");
+            console.log("Respuesta del Ministerio:", respuesta);
+        }
+    });
+}
 
 function editarDatosGestor() {
     // Si entra aquí es porque ya hay un gestor logueado

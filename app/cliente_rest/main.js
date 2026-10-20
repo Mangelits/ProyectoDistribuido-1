@@ -6,16 +6,26 @@ var categoriasLocal = [];
 var modelosLocal = [];      //Inicializo unas variables locales, para evitar muchas llamadar al servidor
 var ubicacionesLocal = [];
 
-window.onload = function() { 
-    cargarDatosBase();
-};
+// PRÁCTICA 3 · PARTE 2: token JWT que devuelve el servidor al hacer login.
+// Hay que enviarlo en TODAS las peticiones a nuestro servidor (menos login y registro).
+var tokenGestor = null;
+
+// Añade el token a una URL de nuestro servidor.
+// Si la URL ya tiene parámetros (?categoria=...) se añade con &, si no con ?
+function conToken(url) {
+    var separador = url.includes("?") ? "&" : "?";
+    return url + separador + "token=" + encodeURIComponent(tokenGestor);
+}
+
+// Antes los datos base se cargaban al abrir la página (window.onload), pero ahora
+// esos servicios están protegidos y necesitan token: se cargan después del login (en entrar()).
 
 function cargarDatosBase() {
-    rest.get("/api/categorias", function (estado, respuesta) {
+    rest.get(conToken("/api/categorias"), function (estado, respuesta) {
         if (estado === 200) categoriasLocal = respuesta;
-        rest.get("/api/modelos", function (estado, respuesta) {
+        rest.get(conToken("/api/modelos"), function (estado, respuesta) {
             if (estado === 200) modelosLocal = respuesta;
-            rest.get("/api/ubicaciones", function (estado, respuesta) {
+            rest.get(conToken("/api/ubicaciones"), function (estado, respuesta) {
                 if (estado === 200) ubicacionesLocal = respuesta;
                 rellenarFiltrosYSelects();
             });
@@ -75,7 +85,10 @@ function entrar() {
 
     rest.post("/api/gestores/login", credenciales, function(estado, respuesta) {
         if (estado === 200) {
-            idGestorLogueado = respuesta; //? Me guardo el ID del gestor logueado
+            // El servidor devuelve { id, token }
+            idGestorLogueado = respuesta.id; //? Me guardo el ID del gestor logueado
+            tokenGestor = respuesta.token;   //? Y el token para las siguientes peticiones
+            cargarDatosBase();               //? Ya con token, cargo categorías, modelos y ubicaciones
             cargarDatosGestorEInicio();
         } else {
             alert("Usuario o contraseña incorrectas");
@@ -85,6 +98,7 @@ function entrar() {
 
 function salir() {
     idGestorLogueado = null;
+    tokenGestor = null; // sin token, el servidor ya no aceptará más peticiones de esta sesión
     
     // Cerrar WebSocket al salir (Parte 3)
     if (wsGestor) {
@@ -103,7 +117,7 @@ function salir() {
 }
 
 function cargarDatosGestorEInicio() {
-    rest.get("/api/gestores/" + idGestorLogueado, function(estado, respuesta) {
+    rest.get(conToken("/api/gestores/" + idGestorLogueado), function(estado, respuesta) {
         if (estado === 200) {
             nombreGestorLogueado = respuesta.nom + " " + respuesta.ape;
             document.getElementById("mensaje_bienvenida").innerText = "Bienvenido " + nombreGestorLogueado + " ";
@@ -289,7 +303,7 @@ function nombreCategoriaRecurso(recurso) {
 // cuando llega a 0 es que ya han llegado todas las respuestas y se pasa al paso siguiente.
 function enviarDatosMinisterio() {
     // 1) Todos los recursos (sin filtros)
-    rest.get("/api/recursos", function (estado, recursos) {
+    rest.get(conToken("/api/recursos"), function (estado, recursos) {
         if (estado !== 200) {
             alert("No se pudieron obtener los recursos");
             return;
@@ -305,7 +319,7 @@ function enviarDatosMinisterio() {
         var hayError = false;
 
         recursos.forEach(function (recurso) {
-            rest.get("/api/recursos/" + recurso.id + "/reservas", function (estado, reservas) {
+            rest.get(conToken("/api/recursos/" + recurso.id + "/reservas"), function (estado, reservas) {
                 if (estado === 200) {
                     reservas.forEach(function (reserva) {
                         reservasConRecurso.push({ reserva: reserva, recurso: recurso });
@@ -344,7 +358,7 @@ function obtenerSanitariosYEnviar(reservasConRecurso) {
     var hayError = false;
 
     idsSanitarios.forEach(function (idSanitario) {
-        rest.get("/api/sanitarios/" + idSanitario, function (estado, sanitario) {
+        rest.get(conToken("/api/sanitarios/" + idSanitario), function (estado, sanitario) {
             if (estado === 200) {
                 sanitarios[idSanitario] = sanitario;
             } else {
@@ -397,7 +411,7 @@ function montarYEnviar(reservasConRecurso, sanitarios) {
 
 function editarDatosGestor() {
     // Si entra aquí es porque ya hay un gestor logueado
-    rest.get("/api/gestores/" + idGestorLogueado, function(estado, respuesta) {
+    rest.get(conToken("/api/gestores/" + idGestorLogueado), function(estado, respuesta) {
         if (estado === 200) {
             document.getElementById("gestor_nombre").value = respuesta.nom;
             document.getElementById("gestor_apellidos").value = respuesta.ape;
@@ -419,7 +433,7 @@ function guardarDatosGestor() {
 
     if (idGestorLogueado) {
         // ACTUALIZAR PERFIL EXISTENTE (PUT)
-        rest.put("/api/gestores/" + idGestorLogueado, datos, function(estado, respuesta) {
+        rest.put(conToken("/api/gestores/" + idGestorLogueado), datos, function(estado, respuesta) {
             if (estado === 200) {
                 alert("Datos actualizados correctamente");
                 cargarDatosGestorEInicio();
@@ -460,7 +474,7 @@ function buscarRecursos() {
 
     var query = `?categoria=${cat}&modelo=${mod}&ubicacion=${ubi}&estado=${est}`; //? Construyo la query string con los filtros (ej: ?categoria=2&modelo=5&ubicacion=Todos&estado=0)
 
-    rest.get("/api/recursos" + query, function(estado, respuesta) { //? Hago la petición al servidor con la query string para que me filtre los recursos
+    rest.get(conToken("/api/recursos" + query), function(estado, respuesta) { //? Hago la petición al servidor con la query string para que me filtre los recursos
         if (estado === 200) {
             var tbody = document.getElementById("tbody_recursos");
             tbody.innerHTML = "";
@@ -500,7 +514,7 @@ function buscarRecursos() {
 
 function eliminarRecurso(id) {
     if(confirm("¿Seguro que deseas borrar este recurso?")) {
-        rest.delete("/api/recursos/" + id, function(estado, respuesta) {
+        rest.delete(conToken("/api/recursos/" + id), function(estado, respuesta) {
             if (estado === 200) {
                 buscarRecursos(); // Refrescar tabla
             } else {
@@ -528,7 +542,7 @@ function abrirRecurso(id) {
     document.getElementById("recurso_id_actual").value = id;
     
     // 1. Obtener datos del recurso
-    rest.get("/api/recursos/" + id, function(estado, respuesta) {
+    rest.get(conToken("/api/recursos/" + id), function(estado, respuesta) {
         if (estado === 200) {
             // Seleccionar categoría basada en el modelo
             var modeloObj = modelosLocal.find(m => m.id === respuesta.modelo);
@@ -563,7 +577,7 @@ function guardarRecurso() {
 
     if (idActual) {
         // Actualizar (PUT)
-        rest.put("/api/recursos/" + idActual, datos, function(estado, respuesta) {
+        rest.put(conToken("/api/recursos/" + idActual), datos, function(estado, respuesta) {
             if (estado === 200) {
                 alert("Recurso actualizado");
                 cambiarSeccion("menu-principal");
@@ -572,7 +586,7 @@ function guardarRecurso() {
         });
     } else {
         // Crear nuevo (POST)
-        rest.post("/api/recursos", datos, function(estado, respuesta) {
+        rest.post(conToken("/api/recursos"), datos, function(estado, respuesta) {
             if (estado === 201) {
                 // Notificar via WS a todos los sanitarios (Parte 3)
                 // == (no ===): datos.modelo es el value del <select> (texto) y
@@ -600,14 +614,14 @@ function guardarRecurso() {
 
 // --- RESERVAS ---
 function cargarReservasRecurso(idRecurso) {
-    rest.get("/api/recursos/" + idRecurso + "/reservas", function(estado, respuesta) {
+    rest.get(conToken("/api/recursos/" + idRecurso + "/reservas"), function(estado, respuesta) {
         if (estado === 200) {
             var tbody = document.getElementById("tbody_reservas");
             tbody.innerHTML = "";
             
             respuesta.forEach(reserva => {
                 // Obtener nombre del sanitario de forma asíncrona para la tabla
-                rest.get("/api/sanitarios/" + reserva.sanitario, function(stSanitario, resSanitario) {
+                rest.get(conToken("/api/sanitarios/" + reserva.sanitario), function(stSanitario, resSanitario) {
                     var nombreSani = (stSanitario === 200) ? (resSanitario.nom + " " + resSanitario.ape) : "Desconocido";
                     
                     var colorClase = obtenerColorReserva(reserva);
@@ -655,13 +669,13 @@ function obtenerColorReserva(reserva) {
 
 // --- RESEÑAS ---
 function cargarResenyasRecurso(idRecurso) {
-    rest.get("/api/recursos/" + idRecurso + "/resenyas", function(estado, respuesta) {
+    rest.get(conToken("/api/recursos/" + idRecurso + "/resenyas"), function(estado, respuesta) {
         if (estado === 200) {
             var tbody = document.getElementById("tbody_resenyas");
             tbody.innerHTML = "";
             
             respuesta.forEach(resenya => {
-                rest.get("/api/sanitarios/" + resenya.sanitario, function(stSanitario, resSanitario) {
+                rest.get(conToken("/api/sanitarios/" + resenya.sanitario), function(stSanitario, resSanitario) {
                     var nombreSani = (stSanitario === 200) ? (resSanitario.nom + " " + resSanitario.ape) : "Desconocido";
                     var fechaFormateada = formatearFecha(resenya.fecha);
 

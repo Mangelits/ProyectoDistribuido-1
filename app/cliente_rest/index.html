@@ -197,7 +197,24 @@
             </table>
         </div>
     </div>
-
+    <!--! EXAMEN -->
+    <div>
+        <input id="Examen"/>
+        <button id="boton-contarRegistros" onclick="contarRegistros()">Contar Registros</button>
+    </div>
+    <div>
+        <button id="contarReservasFinalizadas" onclick="contarReservasFinalizadas()">Contar Reservas Finalizadas</button>
+        <table id="tabla_reservas_finalizadas">
+            <thead>
+                <tr>
+                    <th>Id Area</th>
+                    <th>Reservas Finalizadas</th>
+                </tr>
+            </thead>
+            <tbody id="tbody_reservas_finalizadas">
+            </tbody>
+        </table>
+    </div>
     <div id="vista-recurso" class="seccion">
         <h2>RECURSO</h2>
         

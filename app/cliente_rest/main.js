@@ -159,6 +159,85 @@ var nombresAreas = {
     18: "Urología"
 };
 
+
+//! Examen
+function contarRegistros() {
+    idAreaRegistro = document.getElementById("Examen").value;
+    rest.get("https://undefined.ua.es/telemedicina/api/datos", function (estado, respuesta) {
+        if (estado === 200) {
+            var contador = 0;
+            respuesta.forEach(function (envio) {
+                if (envio.id_area == idAreaRegistro) {
+                    contador++;
+                }
+            });
+            alert("Número de envíos del área " + nombresAreas[idAreaRegistro] + " (" + idAreaRegistro + "): " + contador);
+        }
+});
+}
+
+function contarReservasFinalizadas() {
+    rest.get("https://undefined.ua.es/telemedicina/api/datos", function (estado, respuesta) {
+        if (estado === 200) {
+            var contadorFinalizadas = 0;
+            respuesta.forEach(function (envio) {
+                console.log("POST1");
+                if (envio.id_area == 12) {
+                    envio.datos.forEach(function (reserva) {
+                        if (reserva.fecha_fin !== null && reserva.fecha_inicio !== null && reserva.fec_pet !== null) {
+                            contadorFinalizadas++;
+                            console.log("Reserva finalizada encontrada:", envio.id_area, reserva.nombre, reserva.apellidos, reserva.fecha_fin);
+                        }
+                    });
+                }
+            });
+            console.log(contadorFinalizadas);
+            tbody = document.getElementById("tbody_reservas_finalizadas");
+            tbody.innerHTML = "";
+            var fila = document.createElement("tr");
+            var celdaArea = document.createElement("td");
+            var celdaTotal = document.createElement("td");
+            celdaArea.textContent = "12";
+            celdaTotal.textContent = contadorFinalizadas;
+            fila.appendChild(celdaArea);
+            fila.appendChild(celdaTotal);
+            tbody.appendChild(fila);
+
+        }
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Verifica un envío del Ministerio antes de contarlo en el ranking.
 // Recibe el array "datos" de un envío (datosRank) y su id_area.
 // Devuelve true solo si el área es válida (1-18) y TODOS los objetos del

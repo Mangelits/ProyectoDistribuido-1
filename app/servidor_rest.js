@@ -11,13 +11,12 @@ var app = express();
 const { createClient } = require('@supabase/supabase-js');
 
 // 2. Configurar con tu URL y tu Public Key (anon key)
-//    Si existen las variables de entorno SUPABASE_URL / SUPABASE_KEY (útil al
-//    desplegar en Render) se usan esas; si no, los valores escritos aquí.
+//    Si existen las variables de entorno SUPABASE_URL / SUPABASE_KEY
 const supabaseUrl = process.env.SUPABASE_URL || 'https://brnaacefbccptxevjhhh.supabase.co';
 const supabaseKey = process.env.SUPABASE_KEY || 'sb_publishable_3s4NAqCghKUCOSXcOw0Esw_xIiUlOiE'; // public (publishable) key
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// PRÁCTICA 3 · PARTE 2: autenticación con JWT
+// PRÁCTICA 3 | PARTE 2: autenticación con JWT
 var jwt = require('jwt-simple');
 // Clave para firmar (encode) y comprobar (decode) los tokens. Solo la conoce el servidor.
 // Se puede cambiar con la variable de entorno JWT_CLAVE (útil al desplegar en la Parte 3).
@@ -25,15 +24,15 @@ var CLAVE_JWT = process.env.JWT_CLAVE || 'claveSecretaTelemedicina';
 var DURACION_TOKEN = 60 * 60 * 1000; // el token caduca a la hora (en ms)
 
 /*
-======================================================================
- REST CON BASE DE DATOS EN SUPABASE  (para entenderlo perfectamente)
-======================================================================
+===================================
+ REST CON BASE DE DATOS EN SUPABASE
+===================================
 
- ¿QUÉ ES REST AQUÍ?
-   Petición -> respuesta sobre HTTP. El cliente pide algo a una URL con
-   un VERBO (GET/POST/PUT/DELETE) y el servidor responde UNA vez. Lo
-   monta Express. En REST piensas en URLs y verbos (en RPC, en funciones).
-   Este servidor (puerto 3000) lo usa el CLIENTE GESTOR.
+? ¿QUÉ ES REST AQUÍ?
+?   Petición -> respuesta sobre HTTP. El cliente pide algo a una URL con
+?   un VERBO (GET/POST/PUT/DELETE) y el servidor responde UNA vez. Lo
+?   monta Express. En REST piensas en URLs y verbos (en RPC, en funciones).
+?   Este servidor (puerto 3000) lo usa el CLIENTE GESTOR.
 
  FLUJO DE UNA PETICIÓN (ej. login):
    cliente_rest/main.js  --POST-->  app.post(...)  --supabase-->  PostgreSQL (Supabase)

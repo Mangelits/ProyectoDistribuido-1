@@ -53,9 +53,14 @@
 
         #seccion-avisos { margin-top: 30px; border-top: 2px solid #aaa; padding-top: 10px; }
 
-        .contenedor {
-            display: flex;
-            justify-content: space-between;}
+        /* Ranking de reservas por área médica (Práctica 3) */
+        #seccion-ranking { margin-top: 25px; }
+        #tabla_ranking { max-width: 600px; }
+        #tabla_ranking .col-posicion { width: 40px; text-align: center; }
+        #tabla_ranking .col-numero { width: 150px; text-align: right; }
+        /* Las celdas del cuerpo se crean desde main.js: 1ª columna centrada, 3ª a la derecha */
+        #tabla_ranking tbody td:first-child { text-align: center; }
+        #tabla_ranking tbody td:last-child { text-align: right; }
 
     </style>
 </head>
@@ -117,7 +122,7 @@
                 <option value="Todos">Todos</option>
             </select>
         </div>
-        <div class="contenedor" style="margin-top: 5px;">
+        <div style="margin-top: 5px;">
             <label>Estado: </label>
             <select id="filtro_estado">
                 <option value="Todos">Todos</option>
@@ -125,22 +130,26 @@
                 <option value="1">De baja o defectuoso</option>
                 <option value="2">En mantenimiento</option>
             </select>
-
+        </div>
+        <div style="margin-top: 10px;">
             <button onclick="buscarRecursos()">Buscar</button>
         </div>
-        <div class="contenedor" style="margin-top: 5px;">
-            <button onclick="obtenerRankingReseñas()">Obtener Ranking Reseñas</button>
 
-            <table id="tabla_ranking" style="margin-top: 10px; width: 50%;">
+        <!--! PRÁCTICA 3 | PARTE 1: ranking de reservas por área médica (datos del Ministerio) -->
+        <div id="seccion-ranking">
+            <h3>Ranking de reservas por área médica</h3>
+            <button onclick="obtenerRankingReseñas()">Obtener ranking</button>
+
+            <table id="tabla_ranking">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th class="col-posicion">#</th>
                         <th>Área Médica</th>
-                        <th>Reservas Totales</th>
+                        <th class="col-numero">Reservas Totales</th>
                     </tr>
                 </thead>
                 <tbody id="tbody_ranking">
-                    </tbody>
+                </tbody>
             </table>
         </div>
 
@@ -162,7 +171,7 @@
         
         <button onclick="nuevoRecurso()">Añadir Recurso</button>
 
-        <!-- PRÁCTICA 3 · PARTE 1: envío de reservas al Ministerio de Sanidad -->
+        <!-- PRÁCTICA 3 | PARTE 1: envío de reservas al Ministerio de Sanidad -->
         <div style="margin-top: 15px;">
             <button onclick="enviarDatosMinisterio()">Enviar datos al Ministerio</button>
         </div>

@@ -6,7 +6,7 @@ var categoriasLocal = [];
 var modelosLocal = [];      //Inicializo unas variables locales, para evitar muchas llamadar al servidor
 var ubicacionesLocal = [];
 
-// PRÁCTICA 3 · PARTE 2: token JWT que devuelve el servidor al hacer login.
+// PRÁCTICA 3 | PARTE 2: token JWT que devuelve el servidor al hacer login.
 // Hay que enviarlo en TODAS las peticiones a nuestro servidor (menos login y registro).
 var tokenGestor = null;
 
@@ -255,11 +255,11 @@ function obtenerRankingReseñas() {
             ranking.forEach(function (area, posicion) {
                 var fila = document.createElement("tr");
 
-                var celdaPos = document.createElement("td");
+                var celdaPos = document.createElement("td"); // Posición (1, 2, 3...)
                 celdaPos.textContent = posicion + 1;
 
                 var celdaArea = document.createElement("td");
-                celdaArea.textContent = nombresAreas[area.id_area] || ("Área " + area.id_area);
+                celdaArea.textContent = nombresAreas[area.id_area]
 
                 var celdaTotal = document.createElement("td");
                 celdaTotal.textContent = area.total;

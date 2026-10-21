@@ -275,7 +275,6 @@ function obtenerRankingReseñas() {
     });
 }
 
-
 //* -----------------------------------------
 //!  SERVICIO POST ENVIAR MINISTERIO (P3)
 //* -----------------------------------------
@@ -760,3 +759,66 @@ function añadirAvisoTabla(aviso) {
 
     tbody.innerHTML = fila + tbody.innerHTML; // más reciente arriba
 }
+
+
+//* -----------------------------------------
+//!  EJERCICIOS DE PRÁCTICA (comentados, no se ejecutan)
+//* -----------------------------------------
+// Para probarlos: quitar el /* y el */ y llamarlos desde la consola del navegador.
+// Los dos usan el GET del Ministerio, que devuelve un array de envíos:
+//   [ { id, id_area, fecha, datos: [ {nombre, apellidos, categoría, ...}, ... ] }, ... ]
+
+/*
+// EJERCICIO 1: obtener TODAS las reservas, pero solo las de Neurología (id_area 12).
+// Se recorren los envíos, se quedan los de id_area 12 y se juntan todos sus "datos"
+// (cada objeto de "datos" es una reserva) en un único array.
+function obtenerReservasNeurologia() {
+    rest.get("https://undefined.ua.es/telemedicina/api/datos", function (estado, respuesta) {
+        if (estado !== 200) {
+            alert("No se pudieron obtener los datos del Ministerio");
+            return;
+        }
+
+        var reservasNeurologia = [];
+        respuesta.forEach(function (envio) {
+            if (envio.id_area === 12 && Array.isArray(envio.datos)) {
+                envio.datos.forEach(function (reserva) {
+                    reservasNeurologia.push(reserva);
+                });
+            }
+        });
+
+        console.log("Reservas de Neurología:", reservasNeurologia.length, reservasNeurologia);
+    });
+}
+*/
+
+/*
+// EJERCICIO 2: obtener las reservas de UN área médica (la que se pase por parámetro),
+// pero solo las que están a nombre de Luis.
+// Ejemplo de uso: obtenerReservasDeLuis(3)  -> reservas de Luis en Cardiología.
+// Se compara el nombre sin espacios y en minúsculas, para que valgan "Luis", "luis" o "LUIS ".
+function obtenerReservasDeLuis(idArea) {
+    rest.get("https://undefined.ua.es/telemedicina/api/datos", function (estado, respuesta) {
+        if (estado !== 200) {
+            alert("No se pudieron obtener los datos del Ministerio");
+            return;
+        }
+
+        var reservasLuis = [];
+        respuesta.forEach(function (envio) {
+            if (envio.id_area === idArea && Array.isArray(envio.datos)) {
+                envio.datos.forEach(function (reserva) {
+                    if (reserva && typeof reserva.nombre === "string" &&
+                        reserva.nombre.trim().toLowerCase() === "luis") {
+                        reservasLuis.push(reserva);
+                    }
+                });
+            }
+        });
+
+        console.log("Reservas de Luis en " + (nombresAreas[idArea] || "el área " + idArea) + ":",
+                    reservasLuis.length, reservasLuis);
+    });
+}
+*/
